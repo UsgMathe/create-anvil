@@ -3,6 +3,8 @@
 > Scaffold de **Vite + React + TypeScript**, com roteamento, TanStack Query, validação de ambiente,
 > testes e shadcn/ui opcionais.
 
+**[usgmathe.github.io/create-anvil](https://usgmathe.github.io/create-anvil/)**
+
 ```bash
 npm create anvil@latest meu-app
 cd meu-app
