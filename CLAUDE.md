@@ -146,6 +146,32 @@ A fixture em `tests/fixtures/create-vite@9.2.1/` é a saída real do create-vite
 (`_gitignore` → `.gitignore`) aplicados no carregamento. O nome da pasta tem a versão de propósito:
 uma mudança upstream aparece como pasta nova no diff, não como sobrescrita silenciosa.
 
+## Publicação
+
+Publica pelo GitHub Actions com **trusted publishing (OIDC)** — não existe token npm em lugar
+nenhum, nem secret, nem `.npmrc`. Actions → _Release_ → _Run workflow_, escolhendo a dist-tag.
+
+O trusted publisher é configurado uma vez em npmjs.com, na página do pacote, e os campos são
+**case-sensitive e precisam bater exatamente**:
+
+| Campo                | Valor          |
+| -------------------- | -------------- |
+| Organization or user | `UsgMathe`     |
+| Repository           | `create-anvil` |
+| Workflow filename    | `release.yml`  |
+
+Três armadilhas que já custaram tempo:
+
+- **Não passe `registry-url` no `actions/setup-node`.** Ele escreve
+  `_authToken=${NODE_AUTH_TOKEN}` no `.npmrc`; sem token a variável expande para vazio, o npm cai
+  na autenticação clássica e falha com `ENEEDAUTH`. O OIDC dispensa `.npmrc`.
+- **`setup-node` precisa ser v6+** (usamos v7). Versões anteriores injetam o token fantasma acima.
+- **O npm do runner precisa ser ≥ 11.5.1 e o Node ≥ 22.14**, porque é o próprio npm que faz a
+  troca OIDC. O Node 22 ainda vem com npm 10.x, então o workflow roda `npm install -g npm@latest`
+  antes de publicar.
+
+Renomear o arquivo do workflow quebra a publicação em silêncio — o npm casa pelo nome.
+
 ## Pitfalls
 
 - **O `.gitattributes` com `eol=lf` é obrigatório.** Windows + CRLF + snapshots = tudo vermelho no

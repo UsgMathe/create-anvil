@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist_tag:
+        description: 'Dist-tag do npm. Use "next" para testar antes de virar a chave.'
+        type: choice
+        required: true
+        default: next
+        options:
+          - next
+          - latest
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Garantir npm com suporte a OIDC
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - run: npm ci
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:e2e
+
+      - name: Conferir se a versão já existe no npm
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "::error::$NAME@$VERSION já está publicado. Suba a versão antes de rodar o release."
+            exit 1
+          fi
+          echo "$NAME@$VERSION está livre."
+
+      - name: Publicar
+        run: npm publish --tag ${{ inputs.dist_tag }}
+
+      - name: Resumo
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          {
+            echo "## Publicado"
+            echo ""
+            echo "\`$NAME@$VERSION\` sob a dist-tag \`${{ inputs.dist_tag }}\`."
+            echo ""
+            echo '```bash'
+            echo "npm create anvil@${{ inputs.dist_tag }} meu-app"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
