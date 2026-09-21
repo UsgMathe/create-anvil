@@ -37,7 +37,7 @@ export function createIo(): Io {
     async run(command, args, options) {
       const result = await execa(command, args, {
         cwd: options.cwd,
-        stdio: 'inherit',
+        stdio: ['ignore', 'inherit', 'inherit'],
         reject: true,
       });
       return { exitCode: result.exitCode ?? 0 };
