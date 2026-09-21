@@ -148,17 +148,24 @@ uma mudança upstream aparece como pasta nova no diff, não como sobrescrita sil
 
 ## Publicação
 
-Publica pelo GitHub Actions com **trusted publishing (OIDC)** — não existe token npm em lugar
-nenhum, nem secret, nem `.npmrc`. Actions → _Release_ → _Run workflow_, escolhendo a dist-tag.
+Publica pelo GitHub Actions com **trusted publishing (OIDC)**: Actions → _Release_ → _Run
+workflow_, escolhendo a dist-tag. Não existe token npm no repositório, nem secret, nem `.npmrc`.
 
-O trusted publisher é configurado uma vez em npmjs.com, na página do pacote, e os campos são
-**case-sensitive e precisam bater exatamente**:
+**O OIDC não cobre a primeira publicação de um pacote novo.** O npm exige que o pacote já exista
+para aceitar um trusted publisher — não há "pending publisher". Então o bootstrap é manual e
+autenticado, uma única vez por pacote:
 
-| Campo                | Valor          |
-| -------------------- | -------------- |
-| Organization or user | `UsgMathe`     |
-| Repository           | `create-anvil` |
-| Workflow filename    | `release.yml`  |
+```sh
+npm login                 # ou um token, se o 2FA estiver acessível
+npm publish --tag next
+npm trust github create-anvil --file release.yml --repo UsgMathe/create-anvil --allow-publish
+```
+
+Feito isso, o workflow assume e nenhuma publicação seguinte pede credencial.
+
+O `npm trust` também aceita configuração pela página do pacote em npmjs.com. Os campos são
+**case-sensitive e precisam bater exatamente**: usuário `UsgMathe`, repositório `create-anvil`,
+workflow `release.yml`.
 
 Três armadilhas que já custaram tempo:
 
@@ -170,7 +177,8 @@ Três armadilhas que já custaram tempo:
   troca OIDC. O Node 22 ainda vem com npm 10.x, então o workflow roda `npm install -g npm@latest`
   antes de publicar.
 
-Renomear o arquivo do workflow quebra a publicação em silêncio — o npm casa pelo nome.
+Renomear `release.yml` quebra a publicação em silêncio — o npm casa o publisher pelo nome do
+arquivo.
 
 ## Pitfalls
 
