@@ -12,8 +12,17 @@
       {
         "allowConstantExport": true
       }
-    ]
+    ],
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": "off"
   },
   "ignorePatterns": ["dist", "coverage"],
-  "overrides": []
+  "overrides": [
+    {
+      "files": ["src/components/ui/**"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    }
+  ]
 }

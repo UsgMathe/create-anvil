@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { Check, Copy, Moon, RotateCcw, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { Logo } from '@/components/logo';
+import { Button } from '@/components/ui/button';
+import { useTheme } from '@/lib/theme';
 
 const INSTALL_COMMAND = 'npm create anvil@latest meu-app';
 
@@ -33,7 +38,51 @@ const CHOICES = [
   { label: 'Repositório', value: 'git init com commit inicial, husky e workflow de CI' },
 ];
 
-function CopyButton() {
+function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function Ambience() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div
+        className="absolute -top-64 left-1/2 h-[44rem] w-[44rem] -translate-x-1/2 drift rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, var(--glow-warm), transparent 68%)' }}
+      />
+      <div
+        className="absolute top-[42%] -right-56 h-[36rem] w-[36rem] drift rounded-full blur-3xl"
+        style={{
+          background: 'radial-gradient(circle, var(--glow-cool), transparent 68%)',
+          animationDelay: '-9s',
+        }}
+      />
+      <div
+        className="absolute bottom-[-18rem] -left-40 h-[32rem] w-[32rem] drift rounded-full blur-3xl"
+        style={{
+          background: 'radial-gradient(circle, var(--glow-warm), transparent 70%)',
+          animationDelay: '-15s',
+        }}
+      />
+    </div>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggle}
+      aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+    >
+      {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    </Button>
+  );
+}
+
+function InstallCommand() {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -45,13 +94,19 @@ function CopyButton() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void copy()}
-      className="shrink-0 cursor-pointer rounded-sm border border-rule px-3 py-1.5 font-sans text-xs font-medium text-steel transition-colors hover:border-ink hover:text-ink"
-    >
-      {copied ? 'Copiado' : 'Copiar'}
-    </button>
+    <div className="flex max-w-xl items-center gap-2 rounded-xl glass p-2 pl-4 shadow-sm">
+      <span className="font-mono text-sm text-primary select-none">$</span>
+      <code className="flex-1 truncate font-mono text-sm">{INSTALL_COMMAND}</code>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => void copy()}
+        aria-label="Copiar o comando de instalação"
+      >
+        {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
+        {copied ? 'Copiado' : 'Copiar'}
+      </Button>
+    </div>
   );
 }
 
@@ -60,8 +115,8 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
 
   if (kind === 'command') {
     return (
-      <div className="text-slab-cmd">
-        <span className="text-slab-dim">$ </span>
+      <div className="text-slab-foreground">
+        <span className="text-slab-accent">$ </span>
         {text}
       </div>
     );
@@ -69,8 +124,8 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
 
   if (kind === 'step') {
     return (
-      <div className="text-slab-dim">
-        <span className="text-slab-step">◇ </span>
+      <div className="text-slab-muted">
+        <span className="text-slab-accent">◇ </span>
         {text}
       </div>
     );
@@ -78,94 +133,172 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
 
   if (kind === 'done') {
     return (
-      <div className="text-slab-cmd">
-        <span className="text-slab-dim">└ </span>
+      <div className="text-slab-foreground">
+        <span className="text-slab-muted">└ </span>
         {text}
       </div>
     );
   }
 
-  return <div className="pl-4 text-slab-dim">{text}</div>;
+  return <div className="pl-4 text-slab-muted">{text}</div>;
+}
+
+function TerminalRun({ onReplay }: { onReplay: () => void }) {
+  const [shown, setShown] = useState(() => (prefersReducedMotion() ? SESSION.length : 0));
+
+  useEffect(() => {
+    if (shown >= SESSION.length) return;
+    const id = window.setTimeout(
+      () => {
+        setShown((current) => current + 1);
+      },
+      shown === 0 ? 420 : 240,
+    );
+    return () => {
+      window.clearTimeout(id);
+    };
+  }, [shown]);
+
+  const running = shown < SESSION.length;
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slab-border bg-slab shadow-xl">
+      <div className="flex items-center gap-2 border-b border-slab-border/70 px-5 py-2.5">
+        <Logo className="h-3.5 w-auto text-slab-accent" />
+        <span className="font-mono text-xs text-slab-muted">create-anvil</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onReplay}
+          aria-label="Rodar de novo"
+          className="ml-auto size-7 text-slab-muted hover:bg-white/10 hover:text-slab-foreground"
+        >
+          <RotateCcw className="size-3.5" />
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto p-6 font-mono text-sm leading-7 sm:p-8">
+        <div className="min-w-max">
+          {SESSION.slice(0, shown).map((line, index) => (
+            <TerminalLine key={index} kind={line.kind} text={line.text} />
+          ))}
+          {running ? (
+            <span className="inline-block h-4 w-2 blink bg-slab-accent align-middle" />
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Terminal() {
+  const [run, setRun] = useState(0);
+
+  return (
+    <TerminalRun
+      key={run}
+      onReplay={() => {
+        setRun((value) => value + 1);
+      }}
+    />
+  );
 }
 
 export function App() {
   return (
-    <div className="min-h-svh px-6 py-10 sm:px-10 lg:px-16">
-      <div className="mx-auto max-w-4xl border-l border-rule pl-6 sm:pl-10">
-        <header className="flex flex-wrap items-baseline justify-between gap-4">
-          <span className="font-mono text-sm font-bold tracking-tight">create-anvil</span>
-          <nav className="flex gap-5 text-sm text-steel">
-            <a className="hover:text-ink hover:underline" href={REPO_URL}>
-              GitHub
-            </a>
-            <a className="hover:text-ink hover:underline" href={NPM_URL}>
-              npm
-            </a>
+    <div className="min-h-svh">
+      <Ambience />
+
+      <header className="sticky top-0 z-20 border-x-0 border-t-0 glass">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-3 sm:px-10">
+          <Logo className="h-5 w-auto text-primary" />
+          <span className="flex-1 font-mono text-sm font-bold tracking-tight">create-anvil</span>
+          <nav className="flex items-center gap-1 text-sm">
+            <Button variant="ghost" size="sm" asChild>
+              <a href={REPO_URL}>GitHub</a>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <a href={NPM_URL}>npm</a>
+            </Button>
+            <ThemeToggle />
           </nav>
-        </header>
+        </div>
+      </header>
 
-        <main>
-          <h1 className="mt-20 max-w-2xl text-4xl leading-[1.05] font-extrabold tracking-[-0.03em] text-balance sm:mt-28 sm:text-6xl">
-            Escolha a stack. O resto já está resolvido.
-          </h1>
+      <div className="mx-auto max-w-5xl px-6 pb-24 sm:px-10">
+        <div className="border-l pl-6 sm:pl-10">
+          <main>
+            <h1
+              className="mt-20 max-w-2xl rise text-4xl leading-[1.05] font-extrabold tracking-[-0.03em] text-balance sm:mt-28 sm:text-6xl"
+              style={{ animationDelay: '60ms' }}
+            >
+              Escolha a stack. <span className="text-primary">O resto já está resolvido.</span>
+            </h1>
 
-          <p className="mt-7 max-w-xl text-lg leading-relaxed text-steel">
-            Gera um projeto Vite, React e TypeScript com as ferramentas reconciliadas entre si: o
-            linter não briga com o formatador, o tsconfig está correto e o roteador já está ligado.
-          </p>
+            <p
+              className="mt-7 max-w-xl rise text-lg leading-relaxed text-muted-foreground"
+              style={{ animationDelay: '160ms' }}
+            >
+              Gera um projeto Vite, React e TypeScript com as ferramentas reconciliadas entre si: o
+              linter não briga com o formatador, o tsconfig está correto e o roteador já está
+              ligado.
+            </p>
 
-          <div className="mt-10 flex max-w-xl items-center gap-3 border border-rule bg-white/50 px-4 py-3">
-            <code className="flex-1 truncate font-mono text-sm">{INSTALL_COMMAND}</code>
-            <CopyButton />
-          </div>
-
-          <div className="mt-16 overflow-x-auto rounded-sm bg-slab p-6 font-mono text-sm leading-7 sm:p-8">
-            <div className="min-w-max">
-              {SESSION.map((line, index) => (
-                <TerminalLine key={index} kind={line.kind} text={line.text} />
-              ))}
+            <div className="mt-10 rise" style={{ animationDelay: '260ms' }}>
+              <InstallCommand />
             </div>
-          </div>
 
-          <section className="mt-28">
-            <h2 className="text-2xl font-semibold tracking-tight">O que você escolhe</h2>
-            <dl className="mt-8 border-t border-rule">
-              {CHOICES.map((choice) => (
-                <div
-                  key={choice.label}
-                  className="grid gap-1 border-b border-rule py-4 sm:grid-cols-[13rem_1fr] sm:gap-6"
-                >
-                  <dt className="font-medium">{choice.label}</dt>
-                  <dd className="text-steel">{choice.value}</dd>
+            <div className="mt-16 rise" style={{ animationDelay: '360ms' }}>
+              <Terminal />
+            </div>
+
+            <section className="mt-28">
+              <h2 className="text-2xl font-semibold tracking-tight">O que você escolhe</h2>
+              <dl className="mt-8 border-t">
+                {CHOICES.map((choice) => (
+                  <div
+                    key={choice.label}
+                    className="grid gap-1 border-b px-2 py-4 transition-colors hover:bg-card/60 sm:grid-cols-[13rem_1fr] sm:gap-6"
+                  >
+                    <dt className="font-medium">{choice.label}</dt>
+                    <dd className="text-muted-foreground">{choice.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-6 max-w-xl text-sm text-muted-foreground">
+                Cada escolha também é uma flag, então dá para rodar sem nenhuma pergunta em script
+                ou em integração contínua.
+              </p>
+            </section>
+
+            <section className="mt-28">
+              <div className="max-w-2xl rounded-2xl glass p-8 shadow-sm sm:p-10">
+                <h2 className="text-2xl font-semibold tracking-tight">Não é um template</h2>
+                <p className="mt-6 leading-relaxed text-muted-foreground">
+                  Templates envelhecem. Este CLI roda o{' '}
+                  <code className="font-mono text-foreground">create-vite</code> oficial e, a partir
+                  dele, escreve do zero cada arquivo que controla, em vez de remendar texto. As
+                  versões de React, Vite e TypeScript vêm do próprio create-vite — quem manda nessas
+                  faixas é o time do Vite.
+                </p>
+                <p className="mt-5 leading-relaxed text-muted-foreground">
+                  O projeto gerado sai com um README escrito a partir das suas escolhas, descrevendo
+                  a stack real e os comandos que existem de fato.
+                </p>
+                <div className="mt-8">
+                  <Button asChild>
+                    <a href={REPO_URL}>Ver no GitHub</a>
+                  </Button>
                 </div>
-              ))}
-            </dl>
-            <p className="mt-6 max-w-xl text-sm text-steel">
-              Cada escolha também é uma flag, então dá para rodar sem nenhuma pergunta em script ou
-              em integração contínua.
-            </p>
-          </section>
+              </div>
+            </section>
+          </main>
 
-          <section className="mt-28 max-w-xl">
-            <h2 className="text-2xl font-semibold tracking-tight">Não é um template</h2>
-            <p className="mt-6 leading-relaxed text-steel">
-              Templates envelhecem. Este CLI roda o{' '}
-              <code className="font-mono text-ink">create-vite</code> oficial e, a partir dele,
-              escreve do zero cada arquivo que controla, em vez de remendar texto. As versões de
-              React, Vite e TypeScript vêm do próprio create-vite — quem manda nessas faixas é o
-              time do Vite.
-            </p>
-            <p className="mt-5 leading-relaxed text-steel">
-              O projeto gerado sai com um README escrito a partir das suas escolhas, descrevendo a
-              stack real e os comandos que existem de fato.
-            </p>
-          </section>
-        </main>
-
-        <footer className="mt-28 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-6 text-sm text-steel">
-          <span>MIT</span>
-          <span className="font-mono">Node 20.19+</span>
-        </footer>
+          <footer className="mt-28 flex flex-wrap items-center justify-between gap-4 border-t pt-6 text-sm text-muted-foreground">
+            <span>MIT</span>
+            <span className="font-mono">Node 20.19+</span>
+          </footer>
+        </div>
       </div>
     </div>
   );
