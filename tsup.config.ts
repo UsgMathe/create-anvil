@@ -12,7 +12,7 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   minify: false,
-  sourcemap: true,
+  sourcemap: false,
   dts: false,
   splitting: false,
   treeshake: true,
