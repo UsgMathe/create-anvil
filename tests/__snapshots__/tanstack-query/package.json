@@ -1,0 +1,45 @@
+{
+  "name": "my-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --noEmit",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5",
+    "@tanstack/react-router": "^1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@tailwindcss/vite": "^4",
+    "@tanstack/eslint-plugin-query": "^5",
+    "@tanstack/react-query-devtools": "^5",
+    "@tanstack/react-router-devtools": "^1",
+    "@tanstack/router-plugin": "^1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10",
+    "eslint-config-prettier": "^10",
+    "eslint-plugin-react-hooks": "^7",
+    "eslint-plugin-react-refresh": "^0.5",
+    "globals": "^17",
+    "prettier": "^3",
+    "prettier-plugin-tailwindcss": "^0.8",
+    "tailwindcss": "^4",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8",
+    "vite": "^8.3.0"
+  }
+}
