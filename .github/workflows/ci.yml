@@ -64,15 +64,8 @@ jobs:
 
   e2e:
     if: github.event_name != 'pull_request'
-    strategy:
-      fail-fast: false
-      matrix:
-        combo:
-          - --router=tanstack --query --linter=eslint
-          - --router=react-router --query --linter=oxlint
-          - --router=none --linter=biome
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -81,10 +74,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Gerar projeto e validar
-        run: |
-          mkdir -p /tmp/e2e && cd /tmp/e2e
-          node $GITHUB_WORKSPACE/dist/index.js app --yes ${{ matrix.combo }} --no-git
-          cd app
-          npm run build
-          npm run lint
+      - run: npm run test:e2e
