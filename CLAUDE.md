@@ -119,6 +119,10 @@ combinações em milissegundos.
   utility class"_ e o build inteiro quebra. As variáveis vêm de `r/colors/neutral.json` (campo
   `cssVarsV4`), e o `@theme inline` que as transforma em utilitários é gerado a partir delas.
   Para atualizar o tema, regenere `shadcn-theme.ts` a partir desse endpoint — não edite à mão.
+- **A feature `env` depende da ordem no `.gitignore`.** O `base` contribui `*.env` e o `env`
+  contribui `!sample.env`; a negação só funciona **depois** do padrão que ela nega. A ordem vem da
+  posição no `FEATURES` de `registry.ts` (base primeiro), e há teste garantindo isso — reordenar o
+  registry sem olhar faria o `sample.env` sumir do versionamento em silêncio.
 - **`git init` antes do install.** O `prepare` do husky roda durante o install e exige `.git`.
 - **Formatação depois do install**, rodando o `format` do próprio projeto gerado. Templates escritos
   à mão não batem com a config do Prettier que nós mesmos escrevemos.

@@ -39,6 +39,7 @@ npm create anvil@latest meu-app -- [opções]
 | `--forms` / `--no-forms`                  | react-hook-form + zod.                                                                    |
 | `--husky` / `--no-husky`                  | husky + lint-staged.                                                                      |
 | `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado.                                                         |
+| `--env` / `--no-env`                      | Valida as variáveis de ambiente com zod: `sample.env`, `.env` e `src/config/env.ts`.      |
 | `--git` / `--no-git`                      | `git init` + commit inicial.                                                              |
 | `--install` / `--no-install`              | Instalar dependências.                                                                    |
 | `-y, --yes`                               | Aceita os padrões, sem perguntar.                                                         |

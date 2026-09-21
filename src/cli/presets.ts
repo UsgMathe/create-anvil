@@ -19,6 +19,7 @@ export const PRESETS: Record<PresetName, PresetValues> = {
     forms: false,
     husky: false,
     githubActions: false,
+    env: false,
   },
   full: {
     router: 'tanstack',
@@ -32,6 +33,7 @@ export const PRESETS: Record<PresetName, PresetValues> = {
     forms: true,
     husky: true,
     githubActions: true,
+    env: true,
   },
 };
 

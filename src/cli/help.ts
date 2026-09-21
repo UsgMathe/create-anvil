@@ -19,6 +19,7 @@ Opções:
   --forms / --no-forms                   react-hook-form + zod
   --husky / --no-husky                   husky + lint-staged
   --gh-actions / --no-gh-actions         Workflow de CI no projeto gerado
+  --env / --no-env                       Valida .env com zod (sample.env + config/env.ts)
   --git / --no-git                       git init + commit inicial
   --install / --no-install               Instalar dependências
 

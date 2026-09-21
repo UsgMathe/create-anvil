@@ -15,6 +15,7 @@ export function selectionOf(overrides: Partial<Selection> = {}): Selection {
     forms: false,
     husky: false,
     githubActions: false,
+    env: false,
     git: true,
     install: true,
     ...overrides,

@@ -16,6 +16,7 @@ export interface Selection {
   forms: boolean;
   husky: boolean;
   githubActions: boolean;
+  env: boolean;
   git: boolean;
   install: boolean;
 }

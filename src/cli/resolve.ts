@@ -64,7 +64,15 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
 
   const askBoolean = async (
     key:
-      'tailwind' | 'query' | 'shadcn' | 'vitest' | 'zustand' | 'forms' | 'husky' | 'githubActions',
+      | 'tailwind'
+      | 'query'
+      | 'shadcn'
+      | 'vitest'
+      | 'zustand'
+      | 'forms'
+      | 'husky'
+      | 'githubActions'
+      | 'env',
     message: string,
   ): Promise<boolean> => {
     const flagged = args.booleans[FLAG_FOR[key] ?? (key as BooleanFlag)];
@@ -118,6 +126,7 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
   const forms = await askBoolean('forms', 'react-hook-form + zod?');
   const husky = await askBoolean('husky', 'husky + lint-staged?');
   const githubActions = await askBoolean('githubActions', 'Workflow de CI no projeto gerado?');
+  const envValidation = await askBoolean('env', 'Validação de variáveis de ambiente com zod?');
 
   const prettier = linter === 'biome' ? false : (args.booleans.prettier ?? true);
 
@@ -141,6 +150,7 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
     forms,
     husky,
     githubActions,
+    env: envValidation,
     git: args.booleans.git ?? true,
     install: args.booleans.install ?? true,
   };

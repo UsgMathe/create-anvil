@@ -127,3 +127,51 @@ describe('preset completo', () => {
     }).not.toThrow();
   });
 });
+
+describe('validação de env', () => {
+  it('escreve sample.env, .env e o schema', () => {
+    const paths = plannedPaths({ env: true });
+    expect(paths).toEqual(expect.arrayContaining(['sample.env', '.env', 'src/config/env.ts']));
+  });
+
+  it('não escreve nada quando desligada', () => {
+    const paths = plannedPaths({ env: false });
+    expect(paths).not.toContain('sample.env');
+    expect(paths).not.toContain('src/config/env.ts');
+  });
+
+  it('declara o zod como dependência', () => {
+    const plan = buildPlan(selectionOf({ env: true }), base);
+    expect(plan.packageJson.dependencies).toHaveProperty('zod');
+  });
+
+  it('o sample.env cobre exatamente as chaves do schema', () => {
+    const schema = fileNamed('src/config/env.ts', { env: true });
+    const sample = fileNamed('sample.env', { env: true });
+
+    const schemaKeys = [...schema.matchAll(/^\s+(VITE_[A-Z0-9_]+):/gm)].map((m) => m[1]);
+    const sampleKeys = [...sample.matchAll(/^([A-Z0-9_]+)=/gm)].map((m) => m[1]);
+
+    expect(schemaKeys.length).toBeGreaterThan(0);
+    expect(sampleKeys.sort()).toEqual(schemaKeys.sort());
+  });
+
+  it('o .env nasce igual ao sample, para o projeto rodar de imediato', () => {
+    expect(fileNamed('.env', { env: true })).toBe(fileNamed('sample.env', { env: true }));
+  });
+
+  it('desversiona .env mas preserva o sample, e nessa ordem', () => {
+    const gitignore = fileNamed('.gitignore', { env: true });
+    const lines = gitignore.split('\n');
+    const ignoreAll = lines.indexOf('*.env');
+    const keepSample = lines.indexOf('!sample.env');
+
+    expect(ignoreAll).toBeGreaterThanOrEqual(0);
+    expect(keepSample).toBeGreaterThan(ignoreAll);
+  });
+
+  it('importa o schema no main.tsx, senão a validação nunca roda', () => {
+    expect(fileNamed('src/main.tsx', { env: true })).toContain("import '@/config/env';");
+    expect(fileNamed('src/main.tsx', { env: false })).not.toContain('@/config/env');
+  });
+});

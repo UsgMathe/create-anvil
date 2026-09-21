@@ -1,6 +1,7 @@
 import type { Feature } from '../plan/types.js';
 import { app } from './app.js';
 import { base } from './base.js';
+import { env } from './env.js';
 import { forms } from './forms.js';
 import { githubActions } from './gh-actions.js';
 import { husky } from './husky.js';
@@ -31,6 +32,7 @@ export const FEATURES: readonly Feature[] = [
   testing,
   zustand,
   forms,
+  env,
   husky,
   githubActions,
 ];
