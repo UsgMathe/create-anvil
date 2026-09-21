@@ -25,11 +25,16 @@ function eslintConfig(context: FeatureContext): string {
     selection.query ? "pluginQuery.configs['flat/recommended']" : null,
   ].filter(Boolean);
 
+  const exportOverridePaths = [
+    selection.router === 'tanstack' ? "'src/routes/**/*.tsx'" : null,
+    selection.shadcn ? "'src/components/ui/**/*.tsx'" : null,
+  ].filter(Boolean);
+
   const routeOverride =
-    selection.router === 'tanstack'
+    exportOverridePaths.length > 0
       ? `
   {
-    files: ['src/routes/**/*.tsx'],
+    files: [${exportOverridePaths.join(', ')}],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

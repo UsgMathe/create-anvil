@@ -28,7 +28,7 @@ const COMBINATIONS: { name: string; pm: PackageManager; flags: string[] }[] = [
 ];
 
 function runScript(pm: PackageManager, script: string, cwd: string) {
-  const args = pm === 'npm' ? ['run', script] : [script];
+  const args = pm === 'npm' ? ['run', '--silent', script] : ['--silent', script];
   return execa(pm, args, { cwd, reject: false, stdio: 'pipe' });
 }
 
@@ -63,6 +63,10 @@ describe('scaffold de verdade', () => {
 
       const lint = await runScript(pm, 'lint', root);
       expect(lint.exitCode, lint.stdout).toBe(0);
+      const complaints = [lint.stdout, lint.stderr]
+        .flatMap((output) => output.split(/\r?\n/))
+        .filter((line) => /\b(warning|error)\b/i.test(line));
+      expect(complaints, 'o linter não deve reclamar do código gerado').toEqual([]);
     },
   );
 

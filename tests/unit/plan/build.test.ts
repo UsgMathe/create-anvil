@@ -191,3 +191,14 @@ describe('bloco de teste no vite.config', () => {
     expect(config).not.toContain('vitest/config');
   });
 });
+
+describe('config do oxlint', () => {
+  it('desliga as regras que brigam com o código que nós mesmos geramos', () => {
+    const config = JSON.parse(fileNamed('.oxlintrc.json', buildPlan(selectionOf(), base))) as {
+      rules: Record<string, unknown>;
+    };
+
+    expect(config.rules['react/react-in-jsx-scope']).toBe('off');
+    expect(config.rules['import/no-unassigned-import']).toBe('off');
+  });
+});
