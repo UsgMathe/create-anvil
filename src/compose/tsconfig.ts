@@ -19,6 +19,10 @@ export function addPathAlias(source: string): string {
   return editJsonc(source, [{ path: ['compilerOptions', 'paths', '@/*'], value: ['./src/*'] }]);
 }
 
+export function addExplicitStrict(source: string): string {
+  return editJsonc(source, [{ path: ['compilerOptions', 'strict'], value: true }]);
+}
+
 export function addCompilerTypes(source: string, types: string[]): string {
   if (types.length === 0) return source.endsWith('\n') ? source : `${source}\n`;
   return editJsonc(source, [{ path: ['compilerOptions', 'types'], value: types }]);

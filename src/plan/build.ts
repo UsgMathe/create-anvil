@@ -1,7 +1,7 @@
 import { composeIndexCss } from '../compose/index-css.js';
 import { composeMainTsx } from '../compose/main-tsx.js';
 import { composePackageJson, renderPackageJson } from '../compose/package-json.js';
-import { addPathAlias } from '../compose/tsconfig.js';
+import { addExplicitStrict, addPathAlias } from '../compose/tsconfig.js';
 import { composeViteConfig } from '../compose/vite-config.js';
 import { FEATURES } from '../features/registry.js';
 import { CliError } from '../errors.js';
@@ -137,9 +137,12 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
 
   for (const tsconfigPath of ['tsconfig.json', 'tsconfig.app.json']) {
     const source = base[tsconfigPath];
-    if (source !== undefined) {
-      files.push({ path: tsconfigPath, contents: addPathAlias(source) });
-    }
+    if (source === undefined) continue;
+    const withAlias = addPathAlias(source);
+    files.push({
+      path: tsconfigPath,
+      contents: tsconfigPath === 'tsconfig.app.json' ? addExplicitStrict(withAlias) : withAlias,
+    });
   }
 
   const indexHtml = base['index.html'];

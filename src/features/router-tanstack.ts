@@ -112,7 +112,7 @@ export const routerTanstack: Feature = {
     { path: 'src/routes/index.tsx', contents: INDEX_ROUTE_TSX },
   ],
   scripts: () => ({
-    build: 'vite build && tsc --noEmit',
+    build: 'vite build && tsc -b',
   }),
   vitePlugins: () => [
     {

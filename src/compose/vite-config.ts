@@ -24,7 +24,9 @@ export function composeViteConfig(input: ViteConfigInput): string {
 
   if (input.testBlock) sections.push(input.testBlock);
 
-  return `${renderImports(imports)}
+  const header = input.testBlock ? '/// <reference types="vitest/config" />\n' : '';
+
+  return `${header}${renderImports(imports)}
 
 export default defineConfig({
 ${sections.join('\n')}

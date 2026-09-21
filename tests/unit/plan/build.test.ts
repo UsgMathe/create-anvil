@@ -149,3 +149,45 @@ describe('ordem do build com TanStack Router', () => {
     expect(plan.packageJson.scripts?.build).toBe('tsc -b && vite build');
   });
 });
+
+describe('o typecheck precisa realmente checar', () => {
+  it.each(['none', 'react-router', 'tanstack'] as const)(
+    'router=%s: o build usa tsc -b, nunca tsc --noEmit',
+    (router) => {
+      const plan = buildPlan(selectionOf({ router }), base);
+      const build = plan.packageJson.scripts?.build ?? '';
+      expect(build).toContain('tsc -b');
+      expect(build).not.toContain('--noEmit');
+    },
+  );
+
+  it('o tsconfig raiz continua solution-style, por isso --noEmit não veria arquivo nenhum', () => {
+    const root = fileNamed('tsconfig.json', buildPlan(selectionOf(), base));
+    expect(root).toContain('"files": []');
+    expect(root).toContain('references');
+  });
+});
+
+describe('strict explícito', () => {
+  it('declara strict no tsconfig.app.json em vez de depender do default do TS 6', () => {
+    const tsconfig = fileNamed('tsconfig.app.json', buildPlan(selectionOf(), base));
+    expect(tsconfig).toMatch(/"strict":\s*true/);
+  });
+
+  it('não declara strict no tsconfig raiz, que não compila nada', () => {
+    const root = fileNamed('tsconfig.json', buildPlan(selectionOf(), base));
+    expect(root).not.toMatch(/"strict":\s*true/);
+  });
+});
+
+describe('bloco de teste no vite.config', () => {
+  it('inclui a referência de tipos do vitest, senão o campo test não typechecka', () => {
+    const config = fileNamed('vite.config.ts', buildPlan(selectionOf({ vitest: true }), base));
+    expect(config.startsWith('/// <reference types="vitest/config" />')).toBe(true);
+  });
+
+  it('não inclui a referência quando não há vitest', () => {
+    const config = fileNamed('vite.config.ts', buildPlan(selectionOf({ vitest: false }), base));
+    expect(config).not.toContain('vitest/config');
+  });
+});
