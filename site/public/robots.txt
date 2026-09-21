@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://usgmathe.github.io/create-anvil/sitemap.xml

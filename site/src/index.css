@@ -158,6 +158,19 @@
   }
 }
 
+@keyframes anvil-line {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility line-in {
+  animation: anvil-line 0.16s ease-out both;
+}
+
 @utility rise {
   animation: anvil-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

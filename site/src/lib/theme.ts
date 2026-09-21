@@ -25,8 +25,13 @@ function persistTheme(theme: Theme): void {
   }
 }
 
+function initialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  return storedTheme() ?? systemTheme();
+}
+
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => storedTheme() ?? systemTheme());
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

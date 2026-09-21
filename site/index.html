@@ -2,20 +2,71 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+
+    <title>create-anvil — scaffold de Vite, React e TypeScript com tudo já reconciliado</title>
     <meta
       name="description"
-      content="CLI que gera um projeto Vite + React + TypeScript com as ferramentas já reconciliadas entre si."
+      content="CLI que cria um projeto Vite + React + TypeScript com roteamento, TanStack Query, Tailwind, shadcn/ui, testes e validação de ambiente já configurados e funcionando juntos."
     />
+    <link rel="canonical" href="https://usgmathe.github.io/create-anvil/" />
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="create-anvil" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="https://usgmathe.github.io/create-anvil/" />
+    <meta property="og:title" content="create-anvil — a stack pronta, sem reconciliar ferramenta" />
+    <meta
+      property="og:description"
+      content="Um comando cria um projeto Vite + React + TypeScript em que o linter não briga com o formatador e o roteador já está ligado."
+    />
+    <meta property="og:image" content="https://usgmathe.github.io/create-anvil/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="create-anvil: escolha a stack, o resto já está resolvido."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="create-anvil — a stack pronta, sem reconciliar ferramenta"
+    />
+    <meta
+      name="twitter:description"
+      content="Um comando cria um projeto Vite + React + TypeScript em que o linter não briga com o formatador e o roteador já está ligado."
+    />
+    <meta name="twitter:image" content="https://usgmathe.github.io/create-anvil/og.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <title>create-anvil</title>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "create-anvil",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux",
+        "description": "CLI que cria um projeto Vite + React + TypeScript com roteamento, TanStack Query, Tailwind, shadcn/ui, testes e validação de ambiente já configurados e funcionando juntos.",
+        "url": "https://usgmathe.github.io/create-anvil/",
+        "downloadUrl": "https://www.npmjs.com/package/create-anvil",
+        "codeRepository": "https://github.com/UsgMathe/create-anvil",
+        "programmingLanguage": "TypeScript",
+        "license": "https://opensource.org/licenses/MIT",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+        "author": { "@type": "Person", "name": "Matheus Gabriel Valenga" }
+      }
+    </script>
+
     <script>
       (function () {
         try {

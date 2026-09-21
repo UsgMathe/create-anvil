@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+
 import { App } from '@/app';
 import './index.css';
 
@@ -9,8 +10,14 @@ if (!rootElement) {
   throw new Error('Elemento #root não encontrado no index.html');
 }
 
-createRoot(rootElement).render(
+const app = (
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 );
+
+if (rootElement.hasChildNodes()) {
+  hydrateRoot(rootElement, app);
+} else {
+  createRoot(rootElement).render(app);
+}

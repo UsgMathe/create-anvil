@@ -1,5 +1,5 @@
 import { Check, Copy, Moon, RotateCcw, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
@@ -38,10 +38,6 @@ const CHOICES = [
   { label: 'Repositório', value: 'git init com commit inicial, husky e workflow de CI' },
 ];
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 function Ambience() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -68,16 +64,12 @@ function Ambience() {
 }
 
 function ThemeToggle() {
-  const { theme, toggle } = useTheme();
+  const { toggle } = useTheme();
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggle}
-      aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-    >
-      {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+    <Button variant="ghost" size="icon" onClick={toggle} aria-label="Alternar tema claro e escuro">
+      <Sun className="hidden size-4 dark:block" />
+      <Moon className="size-4 dark:hidden" />
     </Button>
   );
 }
@@ -143,33 +135,23 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
   return <div className="pl-4 text-slab-muted">{text}</div>;
 }
 
-function TerminalRun({ onReplay }: { onReplay: () => void }) {
-  const [shown, setShown] = useState(() => (prefersReducedMotion() ? SESSION.length : 0));
+const FIRST_LINE_DELAY = 420;
+const LINE_STEP = 230;
 
-  useEffect(() => {
-    if (shown >= SESSION.length) return;
-    const id = window.setTimeout(
-      () => {
-        setShown((current) => current + 1);
-      },
-      shown === 0 ? 420 : 240,
-    );
-    return () => {
-      window.clearTimeout(id);
-    };
-  }, [shown]);
-
-  const running = shown < SESSION.length;
+function Terminal() {
+  const [run, setRun] = useState(0);
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-slab-border bg-slab shadow-xl">
       <div className="flex items-center gap-2 border-b border-slab-border/70 px-5 py-2.5">
-        <Logo className="h-3.5 w-auto text-slab-accent" />
+        <Logo className="h-3 w-auto text-slab-accent" />
         <span className="font-mono text-xs text-slab-muted">create-anvil</span>
         <Button
           variant="ghost"
           size="icon"
-          onClick={onReplay}
+          onClick={() => {
+            setRun((value) => value + 1);
+          }}
           aria-label="Rodar de novo"
           className="ml-auto size-7 text-slab-muted hover:bg-white/10 hover:text-slab-foreground"
         >
@@ -177,30 +159,24 @@ function TerminalRun({ onReplay }: { onReplay: () => void }) {
         </Button>
       </div>
 
-      <div className="overflow-x-auto p-6 font-mono text-sm leading-7 sm:p-8">
+      <div key={run} className="overflow-x-auto p-6 font-mono text-sm leading-7 sm:p-8">
         <div className="min-w-max">
-          {SESSION.slice(0, shown).map((line, index) => (
-            <TerminalLine key={index} kind={line.kind} text={line.text} />
+          {SESSION.map((line, index) => (
+            <div
+              key={index}
+              className="line-in"
+              style={{ animationDelay: `${FIRST_LINE_DELAY + index * LINE_STEP}ms` }}
+            >
+              <TerminalLine kind={line.kind} text={line.text} />
+            </div>
           ))}
-          {running ? (
-            <span className="inline-block h-4 w-2 blink bg-slab-accent align-middle" />
-          ) : null}
+          <span
+            className="inline-block h-4 w-2 blink line-in bg-slab-accent align-middle"
+            style={{ animationDelay: `${FIRST_LINE_DELAY + SESSION.length * LINE_STEP}ms` }}
+          />
         </div>
       </div>
     </div>
-  );
-}
-
-function Terminal() {
-  const [run, setRun] = useState(0);
-
-  return (
-    <TerminalRun
-      key={run}
-      onReplay={() => {
-        setRun((value) => value + 1);
-      }}
-    />
   );
 }
 
