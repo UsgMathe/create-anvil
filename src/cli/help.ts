@@ -1,8 +1,8 @@
 export const HELP_TEXT = `
-create-vrtw-usgmathe — scaffold de Vite + React + TypeScript
+create-anvil — scaffold de Vite + React + TypeScript
 
 Uso:
-  npm create vrtw-usgmathe@latest <nome-do-projeto> [opções]
+  npm create anvil@latest <nome-do-projeto> [opções]
 
 Opções:
   --router <none|react-router|tanstack>  Roteador do projeto (padrão: pergunta)

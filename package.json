@@ -1,21 +1,21 @@
 {
-  "name": "create-vrtw-usgmathe",
+  "name": "create-anvil",
   "version": "3.0.0",
   "description": "CLI to scaffold Vite + React + TypeScript + TailwindCSS projects, with optional routing, TanStack Query and shadcn/ui.",
   "license": "MIT",
   "author": "Matheus Gabriel Valenga",
   "type": "module",
   "bin": {
-    "create-vrtw-usgmathe": "./dist/index.js"
+    "create-anvil": "./dist/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/usgmathe/create-vrtw-usgmathe.git"
+    "url": "git+https://github.com/usgmathe/create-anvil.git"
   },
   "bugs": {
-    "url": "https://github.com/usgmathe/create-vrtw-usgmathe/issues"
+    "url": "https://github.com/usgmathe/create-anvil/issues"
   },
-  "homepage": "https://github.com/usgmathe/create-vrtw-usgmathe#readme",
+  "homepage": "https://github.com/usgmathe/create-anvil#readme",
   "keywords": [
     "vite",
     "react",

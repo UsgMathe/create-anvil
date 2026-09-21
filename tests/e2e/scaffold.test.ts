@@ -33,7 +33,7 @@ function runScript(pm: PackageManager, script: string, cwd: string) {
 }
 
 async function scaffold(flags: string[]): Promise<string> {
-  const workspace = await mkdtemp(join(tmpdir(), 'cvrtw-e2e-'));
+  const workspace = await mkdtemp(join(tmpdir(), 'anvil-e2e-'));
   onTestFinished(async () => {
     await rm(workspace, { recursive: true, force: true, maxRetries: 3 });
   });
@@ -76,7 +76,7 @@ describe('scaffold de verdade', () => {
   });
 
   it('remove a pasta quando o scaffold falha no meio', async () => {
-    const workspace = await mkdtemp(join(tmpdir(), 'cvrtw-e2e-'));
+    const workspace = await mkdtemp(join(tmpdir(), 'anvil-e2e-'));
     onTestFinished(async () => {
       await rm(workspace, { recursive: true, force: true, maxRetries: 3 });
     });

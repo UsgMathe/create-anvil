@@ -1,9 +1,9 @@
-# create-vrtw-usgmathe
+# create-anvil
 
 > Scaffold de **Vite + React + TypeScript + TailwindCSS**, com roteamento, TanStack Query e shadcn/ui opcionais.
 
 ```bash
-npm create vrtw-usgmathe@latest meu-app
+npm create anvil@latest meu-app
 cd meu-app
 npm run dev
 ```
@@ -21,7 +21,7 @@ companhia — quem manda nessas faixas é o time do Vite, não este CLI.
 ## Opções
 
 ```bash
-npm create vrtw-usgmathe@latest meu-app -- [opções]
+npm create anvil@latest meu-app -- [opções]
 ```
 
 | Opção                                     | Descrição                                                                                 |

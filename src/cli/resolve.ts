@@ -38,12 +38,9 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
   let rawName = args.projectName;
   if (rawName === undefined) {
     if (!interactive) {
-      throw new CliError(
-        'Informe o nome do projeto. Ex.: npm create vrtw-usgmathe@latest meu-app',
-        {
-          exitCode: 2,
-        },
-      );
+      throw new CliError('Informe o nome do projeto. Ex.: npm create anvil@latest meu-app', {
+        exitCode: 2,
+      });
     }
     rawName = await prompter.text({
       message: 'Nome do projeto',

@@ -5,7 +5,7 @@ introduzir ou invalidar algo aqui, ajuste na mesma tarefa.
 
 ## Visão geral
 
-CLI publicado no npm (`npm create vrtw-usgmathe@latest`) que gera um SPA Vite + React + TypeScript.
+CLI publicado no npm (`npm create anvil@latest`) que gera um SPA Vite + React + TypeScript.
 Escrito em TypeScript, empacotado com `tsup` num único `dist/index.js` **sem dependências de
 runtime** — o pacote é baixado a cada invocação, então cada dependência seria latência para o
 usuário.

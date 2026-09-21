@@ -33,7 +33,7 @@ async function runPipeline(argv: string[], env: NodeJS.ProcessEnv, io: Io): Prom
     return;
   }
 
-  intro(pc.cyan('create-vrtw-usgmathe'));
+  intro(pc.cyan('create-anvil'));
 
   const interactive = isInteractive(args, env);
   const selection = await resolveSelection({ args, interactive, prompter: clackPrompter });
