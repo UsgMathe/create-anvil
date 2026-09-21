@@ -96,8 +96,19 @@ combinações em milissegundos.
 - **`paths` sem `baseUrl` no tsconfig.** O TypeScript 6 emite erro `TS5101` em `baseUrl`, e o
   template fixa `typescript ~6.0.2`. O tsconfig é editado com `jsonc-parser` (`modify`/`applyEdits`),
   que preserva os comentários — nunca com regex.
-- **`build` invertido com TanStack Router**: `vite build && tsc --noEmit`. O `routeTree.gen.ts` é
-  gerado pelo plugin do Vite, então `tsc -b && vite build` falha num projeto recém-criado.
+- **`"strict": true` é declarado explicitamente** no `tsconfig.app.json`, mesmo sendo o padrão do
+  TS 6. O create-vite removeu a linha justamente porque virou padrão, mas aí o projeto passa a
+  depender de um default novo: o TypeScript que roda no editor costuma ser o 5.x, onde `strict` é
+  `false`, e o `createRouter` do TanStack tem uma guarda de tipo que vira a mensagem
+  _"strictNullChecks must be enabled"_. Passa no `tsc` e falha no editor do usuário.
+- **O script `build` usa `tsc -b`, nunca `tsc --noEmit`.** O `tsconfig.json` do create-vite é
+  solution-style (`"files": []` + references), então `tsc --noEmit` **não encontra arquivo nenhum
+  e sai 0** — um typecheck que não checa nada. Há teste travando isso para os três roteadores.
+- **`vite.config.ts` leva `/// <reference types="vitest/config" />`** quando há bloco `test`. Sem
+  isso o `defineConfig` do `vite` não conhece o campo e o `tsc -b` acusa `TS2769`.
+- **`build` invertido com TanStack Router**: `vite build && tsc -b`, em vez do
+  `tsc -b && vite build` do create-vite. O `routeTree.gen.ts` é gerado pelo plugin do Vite, então
+  a ordem original falha num projeto recém-criado, antes de o `vite` ter rodado uma vez.
 - **`react-refresh/only-export-components` desligado em `src/routes/**`.** Arquivos de rota do
   TanStack exportam `Route` e nenhum componente; `allowExportNames` não resolve esse caso.
 - **O shadcn é gerado por nós, sem rodar `shadcn init`.** Escrevemos `components.json` e
@@ -121,7 +132,9 @@ Três projetos do vitest, definidos em `vitest.config.ts`:
 - **`unit`** — validação, detecção de gerenciador e **todos os compositores**, mais a matriz de
   combinações passando por `assertManifestCoherent`. Sem I/O.
 - **`gen`** — `main()` com um `Io` falso: rollback, ordem do pipeline, códigos de saída.
-- **`e2e`** — gera projetos de verdade e roda `build`/`lint`/`test` neles. **Exige `npm run build`
+- **`e2e`** — gera projetos de verdade e roda `build`/`lint`/`test` neles, com **npm e pnpm** (o
+  pnpm é o ambiente do mantenedor, e o job de e2e no CI instala o `pnpm/action-setup` por isso).
+  **Exige `npm run build`
   antes**, porque invoca `dist/index.js`; o teste falha com uma mensagem clara se o bundle não
   existir. Leva alguns minutos (um `npm install` por combinação), então roda só no CI.
 
