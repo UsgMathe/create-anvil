@@ -1,0 +1,74 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshots de composição > biome > árvore de arquivos 1`] = `
+[
+  ".gitignore",
+  "biome.json",
+  "index.html",
+  "package.json",
+  "src/app.tsx",
+  "src/index.css",
+  "src/main.tsx",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "vite.config.ts",
+]
+`;
+
+exports[`snapshots de composição > minimal > árvore de arquivos 1`] = `
+[
+  ".gitignore",
+  ".oxlintrc.json",
+  ".prettierignore",
+  ".prettierrc.json",
+  "index.html",
+  "package.json",
+  "src/app.tsx",
+  "src/index.css",
+  "src/main.tsx",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "vite.config.ts",
+]
+`;
+
+exports[`snapshots de composição > react-router-query > árvore de arquivos 1`] = `
+[
+  ".gitignore",
+  ".oxlintrc.json",
+  ".prettierignore",
+  ".prettierrc.json",
+  "index.html",
+  "package.json",
+  "src/index.css",
+  "src/lib/query-client.ts",
+  "src/main.tsx",
+  "src/router.tsx",
+  "src/routes/home.tsx",
+  "src/routes/not-found.tsx",
+  "src/routes/root-layout.tsx",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "vite.config.ts",
+]
+`;
+
+exports[`snapshots de composição > tanstack-query > árvore de arquivos 1`] = `
+[
+  ".gitignore",
+  ".prettierignore",
+  ".prettierrc.json",
+  "eslint.config.js",
+  "index.html",
+  "package.json",
+  "src/index.css",
+  "src/lib/query-client.ts",
+  "src/main.tsx",
+  "src/router.tsx",
+  "src/routes/__root.tsx",
+  "src/routes/index.tsx",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "vite.config.ts",
+]
+`;
