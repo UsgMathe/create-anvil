@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['bin', 'dist', 'coverage', 'tests/__snapshots__', 'tests/fixtures'] },
+  { ignores: ['bin', 'dist', 'coverage', 'site', 'tests/__snapshots__', 'tests/fixtures'] },
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
