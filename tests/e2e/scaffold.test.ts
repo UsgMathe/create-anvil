@@ -9,12 +9,28 @@ import { beforeAll, describe, expect, it, onTestFinished } from 'vitest';
 const REPO_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const CLI = join(REPO_ROOT, 'dist', 'index.js');
 
-const COMBINATIONS = [
-  { name: 'tanstack', flags: ['--router=tanstack', '--query', '--linter=eslint', '--vitest'] },
-  { name: 'react-router', flags: ['--router=react-router', '--query', '--linter=oxlint'] },
-  { name: 'biome', flags: ['--router=none', '--linter=biome'] },
-  { name: 'shadcn', flags: ['--router=none', '--linter=oxlint', '--shadcn'] },
+type PackageManager = 'npm' | 'pnpm';
+
+const COMBINATIONS: { name: string; pm: PackageManager; flags: string[] }[] = [
+  {
+    name: 'tanstack',
+    pm: 'npm',
+    flags: ['--router=tanstack', '--query', '--linter=eslint', '--vitest'],
+  },
+  { name: 'react-router', pm: 'npm', flags: ['--router=react-router', '--query'] },
+  { name: 'biome', pm: 'npm', flags: ['--router=none', '--linter=biome'] },
+  { name: 'shadcn', pm: 'npm', flags: ['--router=none', '--shadcn'] },
+  {
+    name: 'pnpm',
+    pm: 'pnpm',
+    flags: ['--pm=pnpm', '--router=tanstack', '--query', '--shadcn', '--vitest'],
+  },
 ];
+
+function runScript(pm: PackageManager, script: string, cwd: string) {
+  const args = pm === 'npm' ? ['run', script] : [script];
+  return execa(pm, args, { cwd, reject: false, stdio: 'pipe' });
+}
 
 async function scaffold(flags: string[]): Promise<string> {
   const workspace = await mkdtemp(join(tmpdir(), 'cvrtw-e2e-'));
@@ -39,17 +55,13 @@ describe('scaffold de verdade', () => {
 
   it.each(COMBINATIONS)(
     '$name: o projeto gerado passa no próprio build e lint',
-    async ({ flags }) => {
+    async ({ pm, flags }) => {
       const root = await scaffold(flags);
 
-      const build = await execa('npm', ['run', 'build'], {
-        cwd: root,
-        reject: false,
-        stdio: 'pipe',
-      });
+      const build = await runScript(pm, 'build', root);
       expect(build.exitCode, build.stderr).toBe(0);
 
-      const lint = await execa('npm', ['run', 'lint'], { cwd: root, reject: false, stdio: 'pipe' });
+      const lint = await runScript(pm, 'lint', root);
       expect(lint.exitCode, lint.stdout).toBe(0);
     },
   );
@@ -58,11 +70,7 @@ describe('scaffold de verdade', () => {
     const root = await scaffold(['--preset=full']);
 
     for (const script of ['build', 'lint', 'test']) {
-      const result = await execa('npm', ['run', script], {
-        cwd: root,
-        reject: false,
-        stdio: 'pipe',
-      });
+      const result = await runScript('npm', script, root);
       expect(result.exitCode, `${script}: ${result.stderr || result.stdout}`).toBe(0);
     }
   });
