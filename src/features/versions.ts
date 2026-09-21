@@ -16,6 +16,8 @@ export const VERSIONS = {
   '@tanstack/react-router-devtools': '^1',
   '@tanstack/router-plugin': '^1',
   '@testing-library/dom': '^10',
+  '@vitest/coverage-v8': '^5',
+  axios: '^1',
   '@testing-library/jest-dom': '^7',
   '@testing-library/react': '^16',
   '@testing-library/user-event': '^14',

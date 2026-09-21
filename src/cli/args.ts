@@ -13,6 +13,7 @@ export const BOOLEAN_FLAGS = [
   'husky',
   'gh-actions',
   'env',
+  'api',
   'git',
   'install',
 ] as const;

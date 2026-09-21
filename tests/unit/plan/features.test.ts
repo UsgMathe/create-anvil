@@ -175,3 +175,98 @@ describe('validação de env', () => {
     expect(fileNamed('src/main.tsx', { env: false })).not.toContain('@/config/env');
   });
 });
+
+describe('README gerado', () => {
+  it('substitui o do create-vite em vez de herdá-lo', () => {
+    const readme = fileNamed('README.md', {});
+    expect(readme).not.toContain('This template provides a minimal setup');
+    expect(readme).not.toContain('plugin-react-swc');
+  });
+
+  it('só documenta comandos que existem no package.json', () => {
+    const selection = { router: 'tanstack', linter: 'biome', vitest: true } as const;
+    const plan = buildPlan(selectionOf(selection), base);
+    const readme = fileNamed('README.md', selection);
+    const scripts = Object.keys(plan.packageJson.scripts ?? {});
+
+    for (const match of readme.matchAll(/\| `npm run ([a-z:]+)`/g)) {
+      expect(scripts).toContain(match[1]);
+    }
+  });
+
+  it('descreve só a stack escolhida', () => {
+    const comRouter = fileNamed('README.md', { router: 'tanstack', query: true });
+    expect(comRouter).toContain('TanStack Router');
+    expect(comRouter).toContain('TanStack Query');
+
+    const semRouter = fileNamed('README.md', { router: 'none', query: false });
+    expect(semRouter).not.toContain('TanStack Router');
+    expect(semRouter).not.toContain('TanStack Query');
+  });
+
+  it('avisa que enum não compila, porque o erasableSyntaxOnly está ligado', () => {
+    expect(fileNamed('README.md', {})).toContain('erasableSyntaxOnly');
+  });
+
+  it('usa o comando do gerenciador escolhido', () => {
+    expect(fileNamed('README.md', { packageManager: 'pnpm' })).toContain('pnpm dev');
+    expect(fileNamed('README.md', { packageManager: 'npm' })).toContain('npm run dev');
+  });
+});
+
+describe('cliente HTTP e proxy', () => {
+  it('escreve o http.ts e o proxy apontando para VITE_API_URL', () => {
+    const config = fileNamed('vite.config.ts', { api: true, env: true });
+    expect(config).toContain('loadEnv(mode');
+    expect(config).toContain("'/api'");
+    expect(config).toContain('target: env.VITE_API_URL');
+    expect(plannedPaths({ api: true, env: true })).toContain('src/lib/http.ts');
+  });
+
+  it('usa a forma de objeto do defineConfig quando não há proxy', () => {
+    const config = fileNamed('vite.config.ts', { api: false });
+    expect(config).toContain('export default defineConfig({');
+    expect(config).not.toContain('loadEnv');
+  });
+
+  it('o módulo de exemplo usa o http quando ele existe, e fetch quando não', () => {
+    expect(
+      fileNamed('src/api/posts/posts.api.ts', { query: true, api: true, env: true }),
+    ).toContain("from '@/lib/http'");
+    expect(fileNamed('src/api/posts/posts.api.ts', { query: true, api: false })).toContain(
+      'fetch(',
+    );
+  });
+
+  it('o módulo de exemplo segue a convenção de query-keys', () => {
+    const keys = fileNamed('src/api/posts/posts.keys.ts', { query: true });
+    expect(keys).toContain('all:');
+    expect(keys).toContain('lists:');
+    expect(keys).toContain('list:');
+  });
+});
+
+describe('scripts e tsconfig de teste', () => {
+  it('sobe dev e preview com --host', () => {
+    const plan = buildPlan(selectionOf(), base);
+    expect(plan.packageJson.scripts?.dev).toContain('--host');
+    expect(plan.packageJson.scripts?.preview).toContain('--host');
+  });
+
+  it('com vitest, tira os testes do tsconfig.app.json e cria o tsconfig.vitest.json', () => {
+    const appTsconfig = fileNamed('tsconfig.app.json', { vitest: true });
+    expect(appTsconfig).toContain('"exclude"');
+    expect(appTsconfig).toContain('src/**/*.test.tsx');
+    expect(plannedPaths({ vitest: true })).toContain('tsconfig.vitest.json');
+  });
+
+  it('sem vitest, não mexe no exclude nem cria o tsconfig extra', () => {
+    expect(plannedPaths({ vitest: false })).not.toContain('tsconfig.vitest.json');
+  });
+
+  it('declara o provider de coverage que o script test:coverage usa', () => {
+    const plan = buildPlan(selectionOf({ vitest: true }), base);
+    expect(plan.packageJson.scripts?.['test:coverage']).toContain('--coverage');
+    expect(plan.packageJson.devDependencies).toHaveProperty('@vitest/coverage-v8');
+  });
+});

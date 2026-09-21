@@ -1,4 +1,5 @@
 import type { Feature } from '../plan/types.js';
+import { api } from './api.js';
 import { app } from './app.js';
 import { base } from './base.js';
 import { env } from './env.js';
@@ -20,6 +21,7 @@ import { zustand } from './zustand.js';
 export const FEATURES: readonly Feature[] = [
   base,
   app,
+  api,
   tailwind,
   shadcn,
   routerReactRouter,

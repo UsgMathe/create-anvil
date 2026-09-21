@@ -25,7 +25,9 @@ export interface ResolveInput {
   prompter: Prompter;
 }
 
-export async function resolveSelection(input: ResolveInput): Promise<Selection> {
+export type ResolvedSelection = Omit<Selection, 'packageManager'>;
+
+export async function resolveSelection(input: ResolveInput): Promise<ResolvedSelection> {
   const { args, interactive, prompter } = input;
 
   if (args.preset !== undefined && !isPresetName(args.preset)) {
@@ -72,7 +74,8 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
       | 'forms'
       | 'husky'
       | 'githubActions'
-      | 'env',
+      | 'env'
+      | 'api',
     message: string,
   ): Promise<boolean> => {
     const flagged = args.booleans[FLAG_FOR[key] ?? (key as BooleanFlag)];
@@ -127,8 +130,15 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
   const husky = await askBoolean('husky', 'husky + lint-staged?');
   const githubActions = await askBoolean('githubActions', 'Workflow de CI no projeto gerado?');
   const envValidation = await askBoolean('env', 'Validação de variáveis de ambiente com zod?');
+  const api = await askBoolean('api', 'Cliente HTTP com proxy de /api no dev?');
 
   const prettier = linter === 'biome' ? false : (args.booleans.prettier ?? true);
+
+  if (api && !envValidation) {
+    throw new CliError('O cliente HTTP lê VITE_API_URL de @/config/env, então --api exige --env.', {
+      exitCode: 2,
+    });
+  }
 
   if (shadcn && !tailwind) {
     throw new CliError('shadcn/ui exige o Tailwind. Remova --no-tailwind ou --shadcn.', {
@@ -151,6 +161,7 @@ export async function resolveSelection(input: ResolveInput): Promise<Selection> 
     husky,
     githubActions,
     env: envValidation,
+    api,
     git: args.booleans.git ?? true,
     install: args.booleans.install ?? true,
   };

@@ -36,9 +36,10 @@ async function runPipeline(argv: string[], env: NodeJS.ProcessEnv, io: Io): Prom
   intro(pc.cyan('create-anvil'));
 
   const interactive = isInteractive(args, env);
-  const selection = await resolveSelection({ args, interactive, prompter: clackPrompter });
+  const resolved = await resolveSelection({ args, interactive, prompter: clackPrompter });
 
   const detected = detectPackageManager(env.npm_config_user_agent, args.pm);
+  const selection = { ...resolved, packageManager: detected.name };
   const pm = commandsFor(detected.name);
   log.info(`Gerenciador: ${pm.name}`);
 

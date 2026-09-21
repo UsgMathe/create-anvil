@@ -21,12 +21,48 @@ describe('ambiente de testes', () => {
 });
 `;
 
+const TSCONFIG_VITEST = `${JSON.stringify(
+  {
+    extends: './tsconfig.app.json',
+    compilerOptions: {
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.vitest.tsbuildinfo',
+      types: ['vite/client', 'node'],
+      noEmit: true,
+    },
+    include: ['src', 'vite.config.ts'],
+    exclude: [],
+  },
+  null,
+  2,
+)}\n`;
+
 const TEST_BLOCK = `  test: {
     environment: 'jsdom',
     globals: false,
+    restoreMocks: true,
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'src/test/**',
+        'src/**/*.d.ts',
+        'src/main.tsx',
+        'src/routeTree.gen.ts',
+      ],
+    },
   },`;
+
+export const TEST_FILE_GLOBS = [
+  'src/**/*.test.ts',
+  'src/**/*.test.tsx',
+  'src/**/*.spec.ts',
+  'src/**/*.spec.tsx',
+  'src/test',
+];
 
 export const testing: Feature = {
   id: 'testing',
@@ -34,6 +70,7 @@ export const testing: Feature = {
   devDependencies: () =>
     entries([
       'vitest',
+      '@vitest/coverage-v8',
       'jsdom',
       '@testing-library/react',
       '@testing-library/dom',
@@ -43,7 +80,13 @@ export const testing: Feature = {
   files: () => [
     { path: 'src/test/setup.ts', contents: SETUP_TS },
     { path: 'src/test/smoke.test.tsx', contents: SMOKE_TEST },
+    { path: 'tsconfig.vitest.json', contents: TSCONFIG_VITEST },
   ],
-  scripts: () => ({ test: 'vitest run', 'test:watch': 'vitest' }),
+  scripts: () => ({
+    test: 'vitest run',
+    'test:watch': 'vitest',
+    'test:coverage': 'vitest run --coverage',
+    'test:types': 'tsc -p tsconfig.vitest.json --noEmit',
+  }),
   viteTestBlock: () => TEST_BLOCK,
 };

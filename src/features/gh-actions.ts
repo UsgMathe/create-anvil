@@ -3,7 +3,10 @@ import type { Feature, FeatureContext } from '../plan/types.js';
 function workflow(context: FeatureContext): string {
   const steps = ['      - run: npm run build'];
   if (context.selection.linter !== 'none') steps.unshift('      - run: npm run lint');
-  if (context.selection.vitest) steps.push('      - run: npm test');
+  if (context.selection.vitest) {
+    steps.push('      - run: npm run test:types');
+    steps.push('      - run: npm test');
+  }
 
   return `name: CI
 

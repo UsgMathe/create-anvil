@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build && tsc -b",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --host",
     "typecheck": "tsc -b",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

@@ -17,6 +17,8 @@ export interface Selection {
   husky: boolean;
   githubActions: boolean;
   env: boolean;
+  api: boolean;
+  packageManager: PackageManagerName;
   git: boolean;
   install: boolean;
 }
@@ -104,5 +106,6 @@ export interface Feature {
   cssBlocks?(context: FeatureContext): CssContribution[];
   gitignore?(context: FeatureContext): string[];
   viteTestBlock?(context: FeatureContext): string;
+  viteServerBlock?(context: FeatureContext): string;
   tsconfigAppTypes?(context: FeatureContext): string[];
 }

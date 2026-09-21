@@ -1,9 +1,11 @@
 import { composeIndexCss } from '../compose/index-css.js';
 import { composeMainTsx } from '../compose/main-tsx.js';
 import { composePackageJson, renderPackageJson } from '../compose/package-json.js';
-import { addExplicitStrict, addPathAlias } from '../compose/tsconfig.js';
+import { composeReadme } from '../compose/readme.js';
+import { addExcludes, addExplicitStrict, addPathAlias } from '../compose/tsconfig.js';
 import { composeViteConfig } from '../compose/vite-config.js';
 import { FEATURES } from '../features/registry.js';
+import { TEST_FILE_GLOBS } from '../features/testing.js';
 import { CliError } from '../errors.js';
 import type {
   BaseTree,
@@ -122,13 +124,17 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
     .map((feature) => feature.viteTestBlock?.(context))
     .find((block): block is string => Boolean(block));
 
+  const serverBlock = active
+    .map((feature) => feature.viteServerBlock?.(context))
+    .find((block): block is string => Boolean(block));
+
   files.push({
     path: 'src/main.tsx',
     contents: composeMainTsx({ providers, preamble, rootElement }),
   });
   files.push({
     path: 'vite.config.ts',
-    contents: composeViteConfig({ plugins: vitePlugins, testBlock }),
+    contents: composeViteConfig({ plugins: vitePlugins, testBlock, serverBlock }),
   });
 
   if (cssBlocks.length > 0) {
@@ -138,11 +144,12 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
   for (const tsconfigPath of ['tsconfig.json', 'tsconfig.app.json']) {
     const source = base[tsconfigPath];
     if (source === undefined) continue;
-    const withAlias = addPathAlias(source);
-    files.push({
-      path: tsconfigPath,
-      contents: tsconfigPath === 'tsconfig.app.json' ? addExplicitStrict(withAlias) : withAlias,
-    });
+    let contents = addPathAlias(source);
+    if (tsconfigPath === 'tsconfig.app.json') {
+      contents = addExplicitStrict(contents);
+      if (selection.vitest) contents = addExcludes(contents, TEST_FILE_GLOBS);
+    }
+    files.push({ path: tsconfigPath, contents });
   }
 
   const indexHtml = base['index.html'];
@@ -170,6 +177,15 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
   });
 
   files.push({ path: 'package.json', contents: renderPackageJson(packageJson) });
+
+  files.push({
+    path: 'README.md',
+    contents: composeReadme({
+      selection,
+      scripts: packageJson.scripts ?? {},
+      packageManager: selection.packageManager,
+    }),
+  });
 
   return { files, removals: [...removals], packageJson };
 }

@@ -123,6 +123,21 @@ combinações em milissegundos.
   contribui `!sample.env`; a negação só funciona **depois** do padrão que ela nega. A ordem vem da
   posição no `FEATURES` de `registry.ts` (base primeiro), e há teste garantindo isso — reordenar o
   registry sem olhar faria o `sample.env` sumir do versionamento em silêncio.
+- **O README do projeto gerado é escrito por nós** (`src/compose/readme.ts`), substituindo o do
+  create-vite — que ensina a configurar Oxlint mesmo quando o usuário escolheu ESLint ou Biome e
+  sugere trocar para `plugin-react-swc`, o que quebraria a config gerada. Há teste garantindo que
+  ele só documenta scripts que existem de fato no `package.json`.
+- **O `vite.config.ts` muda de forma quando há proxy.** Sem proxy sai
+  `defineConfig({ ... })`; com proxy sai `defineConfig(({ mode }) => ...)` mais `loadEnv`, porque o
+  alvo do proxy vem de `VITE_API_URL` e só existe em tempo de config. O compositor cuida das duas
+  formas e da indentação.
+- **A feature `api` exige a `env`**, porque `src/lib/http.ts` importa `@/config/env`. O `baseURL` é
+  `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
+  sessão preservado), em produção vai direto.
+- **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json` próprio,
+  rodado pelo script `test:types`. O build de produção deixa de typecheckar teste. O `test:types`
+  entra no CI do projeto gerado — script que ninguém roda é script que mente.
+
 - **`git init` antes do install.** O `prepare` do husky roda durante o install e exige `.git`.
 - **Formatação depois do install**, rodando o `format` do próprio projeto gerado. Templates escritos
   à mão não batem com a config do Prettier que nós mesmos escrevemos.

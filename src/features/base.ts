@@ -13,7 +13,7 @@ export const base: Feature = {
   id: 'base',
   enabled: () => true,
   removeFiles: () => REMOVED_BY_BASE,
-  scripts: () => ({ typecheck: 'tsc -b' }),
+  scripts: () => ({ dev: 'vite --host', preview: 'vite preview --host', typecheck: 'tsc -b' }),
   vitePlugins: () => [
     {
       order: 30,

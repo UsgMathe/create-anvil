@@ -20,6 +20,7 @@ Opções:
   --husky / --no-husky                   husky + lint-staged
   --gh-actions / --no-gh-actions         Workflow de CI no projeto gerado
   --env / --no-env                       Valida .env com zod (sample.env + config/env.ts)
+  --api / --no-api                       Cliente HTTP (axios) + proxy de /api no dev
   --git / --no-git                       git init + commit inicial
   --install / --no-install               Instalar dependências
 

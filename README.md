@@ -24,27 +24,28 @@ companhia — quem manda nessas faixas é o time do Vite, não este CLI.
 npm create anvil@latest meu-app -- [opções]
 ```
 
-| Opção                                     | Descrição                                                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `--router <none\|react-router\|tanstack>` | Roteamento. `react-router` usa a v8 em modo biblioteca; `tanstack` usa rotas por arquivo. |
-| `--linter <oxlint\|eslint\|biome>`        | Padrão `oxlint` (o que o create-vite já entrega) + Prettier.                              |
-| `--preset <minimal\|full>`                | Conjunto pronto de escolhas.                                                              |
-| `--pm <npm\|pnpm\|yarn\|bun>`             | Força o gerenciador de pacotes.                                                           |
-| `--query` / `--no-query`                  | TanStack Query.                                                                           |
-| `--tailwind` / `--no-tailwind`            | TailwindCSS v4.                                                                           |
-| `--shadcn` / `--no-shadcn`                | shadcn/ui.                                                                                |
-| `--prettier` / `--no-prettier`            | Prettier.                                                                                 |
-| `--vitest` / `--no-vitest`                | Vitest + Testing Library.                                                                 |
-| `--zustand` / `--no-zustand`              | Zustand.                                                                                  |
-| `--forms` / `--no-forms`                  | react-hook-form + zod.                                                                    |
-| `--husky` / `--no-husky`                  | husky + lint-staged.                                                                      |
-| `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado.                                                         |
-| `--env` / `--no-env`                      | Valida as variáveis de ambiente com zod: `sample.env`, `.env` e `src/config/env.ts`.      |
-| `--git` / `--no-git`                      | `git init` + commit inicial.                                                              |
-| `--install` / `--no-install`              | Instalar dependências.                                                                    |
-| `-y, --yes`                               | Aceita os padrões, sem perguntar.                                                         |
-| `--dry-run`                               | Mostra o que seria feito e sai.                                                           |
-| `--keep-on-error`                         | Não apaga a pasta se algo falhar.                                                         |
+| Opção                                     | Descrição                                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `--router <none\|react-router\|tanstack>` | Roteamento. `react-router` usa a v8 em modo biblioteca; `tanstack` usa rotas por arquivo.     |
+| `--linter <oxlint\|eslint\|biome>`        | Padrão `oxlint` (o que o create-vite já entrega) + Prettier.                                  |
+| `--preset <minimal\|full>`                | Conjunto pronto de escolhas.                                                                  |
+| `--pm <npm\|pnpm\|yarn\|bun>`             | Força o gerenciador de pacotes.                                                               |
+| `--query` / `--no-query`                  | TanStack Query.                                                                               |
+| `--tailwind` / `--no-tailwind`            | TailwindCSS v4.                                                                               |
+| `--shadcn` / `--no-shadcn`                | shadcn/ui.                                                                                    |
+| `--prettier` / `--no-prettier`            | Prettier.                                                                                     |
+| `--vitest` / `--no-vitest`                | Vitest + Testing Library.                                                                     |
+| `--zustand` / `--no-zustand`              | Zustand.                                                                                      |
+| `--forms` / `--no-forms`                  | react-hook-form + zod.                                                                        |
+| `--husky` / `--no-husky`                  | husky + lint-staged.                                                                          |
+| `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado.                                                             |
+| `--env` / `--no-env`                      | Valida as variáveis de ambiente com zod: `sample.env`, `.env` e `src/config/env.ts`.          |
+| `--api` / `--no-api`                      | Cliente HTTP (axios) e proxy de `/api` para `VITE_API_URL` no desenvolvimento. Exige `--env`. |
+| `--git` / `--no-git`                      | `git init` + commit inicial.                                                                  |
+| `--install` / `--no-install`              | Instalar dependências.                                                                        |
+| `-y, --yes`                               | Aceita os padrões, sem perguntar.                                                             |
+| `--dry-run`                               | Mostra o que seria feito e sai.                                                               |
+| `--keep-on-error`                         | Não apaga a pasta se algo falhar.                                                             |
 
 Toda escolha tem flag, e **uma flag presente suprime o prompt correspondente** — o CLI é usável em
 script e em CI sem nenhuma interação. Se algo falhar no meio, a pasta criada é removida.

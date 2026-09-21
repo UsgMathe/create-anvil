@@ -19,6 +19,11 @@ export function addPathAlias(source: string): string {
   return editJsonc(source, [{ path: ['compilerOptions', 'paths', '@/*'], value: ['./src/*'] }]);
 }
 
+export function addExcludes(source: string, globs: string[]): string {
+  if (globs.length === 0) return source;
+  return editJsonc(source, [{ path: ['exclude'], value: globs }]);
+}
+
 export function addExplicitStrict(source: string): string {
   return editJsonc(source, [{ path: ['compilerOptions', 'strict'], value: true }]);
 }
