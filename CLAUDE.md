@@ -18,7 +18,7 @@ inglês. Indentação de 2 espaços.
 ```sh
 npm install
 npm test           # projetos "unit" + "gen" — rápidos, sem rede
-npm run test:e2e   # gera projetos de verdade e roda build/lint neles
+npm run build && npm run test:e2e   # e2e: gera projetos de verdade (lento, com rede)
 npm run typecheck
 npm run lint
 npm run build      # tsup -> dist/index.js
@@ -121,7 +121,9 @@ Três projetos do vitest, definidos em `vitest.config.ts`:
 - **`unit`** — validação, detecção de gerenciador e **todos os compositores**, mais a matriz de
   combinações passando por `assertManifestCoherent`. Sem I/O.
 - **`gen`** — `main()` com um `Io` falso: rollback, ordem do pipeline, códigos de saída.
-- **`e2e`** — gera projetos de verdade e roda `build`/`lint` neles. Só no CI.
+- **`e2e`** — gera projetos de verdade e roda `build`/`lint`/`test` neles. **Exige `npm run build`
+  antes**, porque invoca `dist/index.js`; o teste falha com uma mensagem clara se o bundle não
+  existir. Leva alguns minutos (um `npm install` por combinação), então roda só no CI.
 
 A fixture em `tests/fixtures/create-vite@9.2.1/` é a saída real do create-vite, com os renomes
 (`_gitignore` → `.gitignore`) aplicados no carregamento. O nome da pasta tem a versão de propósito:
@@ -133,6 +135,12 @@ uma mudança upstream aparece como pasta nova no diff, não como sobrescrita sil
   CI do Linux.
 - **Nunca use `split` com classe de caractere para separar caminhos.** Use `toPosix()` de
   `src/run/io.ts`, que usa `path.sep`. No Windows `relative()` devolve `\`.
+- **`io.run` usa `stdio: ['ignore', 'inherit', 'inherit']` — não troque por `'inherit'`.** Todo
+  processo filho roda com `--no-interactive` e nenhum deve ler stdin. Com `'inherit'`, quem
+  invocar o CLI programaticamente (execa com `stdio: 'pipe'`, um runner de CI) entrega ao
+  `create-vite` um stdin que é um pipe aberto que ninguém escreve nem fecha, e ele **trava para
+  sempre** no passo de scaffold. Com `ignore` a leitura recebe EOF na hora. O teste e2e cobre isso
+  porque spawna o CLI com `stdio: 'pipe'`.
 - `tsconfig.json` exclui `tests/fixtures/**` e `tests/__snapshots__/**`: os snapshots têm extensão
   real (`.tsx`) para serem revisáveis, e sem o exclude o `tsc` tenta compilá-los.
 - Os testes `gen` importam de `src/cli/main.js`, **nunca** de `src/index.js`.
