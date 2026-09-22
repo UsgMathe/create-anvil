@@ -197,6 +197,12 @@ O `npm trust` também aceita configuração pela página do pacote em npmjs.com.
 **case-sensitive e precisam bater exatamente**: usuário `UsgMathe`, repositório `create-anvil`,
 workflow `release.yml`.
 
+`npm trust github` responder **409** (`a trusted publisher configuration ... already exists`) não é
+erro de permissão: já existe um publisher. Veja qual com `npm trust list create-anvil` e, se estiver
+errado, `npm trust revoke create-anvil --id=<id>` antes de recriar. O job do `release.yml` **não
+declara `environment`** — um publisher configurado com environment não casa com o token e a
+publicação falha.
+
 Três armadilhas que já custaram tempo:
 
 - **Não passe `registry-url` no `actions/setup-node`.** Ele escreve

@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/usgmathe/create-anvil.git"
+    "url": "git+https://github.com/UsgMathe/create-anvil.git"
   },
   "bugs": {
-    "url": "https://github.com/usgmathe/create-anvil/issues"
+    "url": "https://github.com/UsgMathe/create-anvil/issues"
   },
-  "homepage": "https://github.com/usgmathe/create-anvil#readme",
+  "homepage": "https://github.com/UsgMathe/create-anvil#readme",
   "keywords": [
     "vite",
     "react",
