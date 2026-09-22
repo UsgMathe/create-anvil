@@ -5,7 +5,8 @@ introduzir ou invalidar algo aqui, ajuste na mesma tarefa.
 
 ## Visão geral
 
-CLI publicado no npm (`npm create anvil@latest`) que gera um SPA Vite + React + TypeScript.
+CLI publicado no npm (`pnpm create anvil@latest`, ou npm, yarn e bun) que gera um SPA Vite + React +
+TypeScript.
 Escrito em TypeScript, empacotado com `tsup` num único `dist/index.js` **sem dependências de
 runtime** — o pacote é baixado a cada invocação, então cada dependência seria latência para o
 usuário.
@@ -160,6 +161,20 @@ Três projetos do vitest, definidos em `vitest.config.ts`:
 A fixture em `tests/fixtures/create-vite@9.2.1/` é a saída real do create-vite, com os renomes
 (`_gitignore` → `.gitignore`) aplicados no carregamento. O nome da pasta tem a versão de propósito:
 uma mudança upstream aparece como pasta nova no diff, não como sobrescrita silenciosa.
+
+## Site
+
+`site/` é a landing page publicada em <https://usgmathe.github.io/create-anvil/> pelo workflow
+_Site_, a cada push em `master` que toque `site/**`. Tem `package.json` e lockfile próprios; não é
+workspace do CLI.
+
+- **O `build` pré-renderiza** (`vite build --ssr` mais `scripts/prerender.mjs`), então tudo na
+  página precisa renderizar no servidor — nada de `window` ou `localStorage` durante o render. O
+  tema resolve isso com o script inline do `index.html`, antes da hidratação.
+- **Os comandos por gerenciador saem de `site/src/lib/package-managers.ts`** e precisam bater com o
+  `runScript` de `src/env/package-manager.ts`: a página mostra a saída real do CLI, então `bun` é
+  `bun run dev` e `pnpm` é `pnpm dev`. A ordem das abas — pnpm, npm, yarn, bun — é a mesma do README.
+- Os componentes de `site/src/components/ui/` vêm do registro do shadcn sem edição.
 
 ## Publicação
 

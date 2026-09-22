@@ -8,7 +8,7 @@ Opções:
   --router <none|react-router|tanstack>  Roteador do projeto (padrão: pergunta)
   --linter <oxlint|eslint|biome>         Linter (padrão: oxlint, o do create-vite)
   --preset <minimal|full>                Conjunto pronto de escolhas
-  --pm <npm|pnpm|yarn|bun>               Força o gerenciador de pacotes
+  --pm <pnpm|npm|yarn|bun>               Força o gerenciador de pacotes
 
   --query / --no-query                   TanStack Query
   --tailwind / --no-tailwind             TailwindCSS v4

@@ -1,28 +1,37 @@
-import { Check, Copy, Moon, RotateCcw, Sun } from 'lucide-react';
+import { Check, Copy, Moon, RotateCcw, SquareTerminal, Sun } from 'lucide-react';
 import { useState } from 'react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  createCommand,
+  DEFAULT_PACKAGE_MANAGER,
+  PACKAGE_MANAGERS,
+  runCommand,
+  type PackageManager,
+} from '@/lib/package-managers';
 import { useTheme } from '@/lib/theme';
-
-const INSTALL_COMMAND = 'npm create anvil@latest meu-app';
 
 const REPO_URL = 'https://github.com/UsgMathe/create-anvil';
 const NPM_URL = 'https://www.npmjs.com/package/create-anvil';
 
-const SESSION = [
-  { kind: 'command', text: 'npm create anvil@latest loja' },
-  { kind: 'blank', text: '' },
-  { kind: 'step', text: 'Base criada' },
-  { kind: 'step', text: 'Arquivos do projeto gerados' },
-  { kind: 'step', text: 'Dependências instaladas' },
-  { kind: 'step', text: 'Projeto formatado' },
-  { kind: 'blank', text: '' },
-  { kind: 'done', text: 'Pronto.' },
-  { kind: 'blank', text: '' },
-  { kind: 'hint', text: 'cd loja' },
-  { kind: 'hint', text: 'npm run dev' },
-];
+function sessionFor(packageManager: PackageManager) {
+  return [
+    { kind: 'command', text: createCommand(packageManager, 'loja') },
+    { kind: 'blank', text: '' },
+    { kind: 'info', text: `Gerenciador: ${packageManager}` },
+    { kind: 'step', text: 'Base criada' },
+    { kind: 'step', text: 'Arquivos do projeto gerados' },
+    { kind: 'step', text: 'Dependências instaladas' },
+    { kind: 'step', text: 'Projeto formatado' },
+    { kind: 'blank', text: '' },
+    { kind: 'done', text: 'Pronto.' },
+    { kind: 'blank', text: '' },
+    { kind: 'hint', text: 'cd loja' },
+    { kind: 'hint', text: runCommand(packageManager, 'dev') },
+  ];
+}
 
 const CHOICES = [
   {
@@ -74,11 +83,18 @@ function ThemeToggle() {
   );
 }
 
-function InstallCommand() {
+function InstallCommand({
+  packageManager,
+  onSelect,
+}: {
+  packageManager: PackageManager;
+  onSelect: (value: PackageManager) => void;
+}) {
   const [copied, setCopied] = useState(false);
+  const command = createCommand(packageManager, 'meu-app');
 
   async function copy() {
-    await navigator.clipboard.writeText(INSTALL_COMMAND);
+    await navigator.clipboard.writeText(command);
     setCopied(true);
     window.setTimeout(() => {
       setCopied(false);
@@ -86,19 +102,42 @@ function InstallCommand() {
   }
 
   return (
-    <div className="flex max-w-xl items-center gap-2 rounded-xl glass p-2 pl-4 shadow-sm">
-      <span className="font-mono text-sm text-primary select-none">$</span>
-      <code className="flex-1 truncate font-mono text-sm">{INSTALL_COMMAND}</code>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => void copy()}
-        aria-label="Copiar o comando de instalação"
-      >
-        {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-        {copied ? 'Copiado' : 'Copiar'}
-      </Button>
-    </div>
+    <Tabs
+      value={packageManager}
+      onValueChange={(value) => {
+        onSelect(value as PackageManager);
+      }}
+      className="max-w-xl gap-0 overflow-hidden rounded-xl glass shadow-sm"
+    >
+      <div className="flex items-center gap-1 border-b px-2 py-1">
+        <SquareTerminal className="mx-1.5 size-4 shrink-0 text-muted-foreground" />
+        <TabsList className="bg-transparent p-0">
+          {PACKAGE_MANAGERS.map((name) => (
+            <TabsTrigger key={name} value={name} className="px-3 font-mono text-xs">
+              {name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => void copy()}
+          aria-label={`Copiar: ${command}`}
+          className="ml-auto"
+        >
+          {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
+        </Button>
+      </div>
+
+      {PACKAGE_MANAGERS.map((name) => (
+        <TabsContent key={name} value={name} className="overflow-x-auto px-4 py-3.5">
+          <code className="font-mono text-sm whitespace-nowrap">
+            <span className="text-primary select-none">$ </span>
+            {createCommand(name, 'meu-app')}
+          </code>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }
 
@@ -109,6 +148,15 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
     return (
       <div className="text-slab-foreground">
         <span className="text-slab-accent">$ </span>
+        {text}
+      </div>
+    );
+  }
+
+  if (kind === 'info') {
+    return (
+      <div className="text-slab-muted">
+        <span className="text-slab-accent">● </span>
         {text}
       </div>
     );
@@ -138,8 +186,9 @@ function TerminalLine({ kind, text }: { kind: string; text: string }) {
 const FIRST_LINE_DELAY = 420;
 const LINE_STEP = 230;
 
-function Terminal() {
+function Terminal({ packageManager }: { packageManager: PackageManager }) {
   const [run, setRun] = useState(0);
+  const session = sessionFor(packageManager);
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-slab-border bg-slab shadow-xl">
@@ -161,7 +210,7 @@ function Terminal() {
 
       <div key={run} className="overflow-x-auto p-6 font-mono text-sm leading-7 sm:p-8">
         <div className="min-w-max">
-          {SESSION.map((line, index) => (
+          {session.map((line, index) => (
             <div
               key={index}
               className="line-in"
@@ -172,7 +221,7 @@ function Terminal() {
           ))}
           <span
             className="inline-block h-4 w-2 blink line-in bg-slab-accent align-middle"
-            style={{ animationDelay: `${FIRST_LINE_DELAY + SESSION.length * LINE_STEP}ms` }}
+            style={{ animationDelay: `${FIRST_LINE_DELAY + session.length * LINE_STEP}ms` }}
           />
         </div>
       </div>
@@ -181,6 +230,8 @@ function Terminal() {
 }
 
 export function App() {
+  const [packageManager, setPackageManager] = useState<PackageManager>(DEFAULT_PACKAGE_MANAGER);
+
   return (
     <div className="min-h-svh">
       <Ambience />
@@ -221,11 +272,11 @@ export function App() {
             </p>
 
             <div className="mt-10 rise" style={{ animationDelay: '260ms' }}>
-              <InstallCommand />
+              <InstallCommand packageManager={packageManager} onSelect={setPackageManager} />
             </div>
 
             <div className="mt-16 rise" style={{ animationDelay: '360ms' }}>
-              <Terminal />
+              <Terminal packageManager={packageManager} />
             </div>
 
             <section className="mt-28">

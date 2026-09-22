@@ -18,7 +18,7 @@ export function detectPackageManager(
 ): DetectedPackageManager {
   if (override) {
     if (!KNOWN.has(override)) {
-      throw new Error(`Gerenciador desconhecido: "${override}". Use npm, pnpm, yarn ou bun.`);
+      throw new Error(`Gerenciador desconhecido: "${override}". Use pnpm, npm, yarn ou bun.`);
     }
     return { name: override as PackageManagerName };
   }

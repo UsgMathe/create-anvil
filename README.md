@@ -11,13 +11,39 @@
 
 </div>
 
+## Instalação
+
+**pnpm**
+
+```bash
+pnpm create anvil@latest meu-app
+```
+
+**npm**
+
 ```bash
 npm create anvil@latest meu-app
 ```
 
-```
-$ npm create anvil@latest loja
+**yarn**
 
+```bash
+yarn create anvil meu-app
+```
+
+**bun**
+
+```bash
+bun create anvil meu-app
+```
+
+O gerenciador que você usar é o que o CLI adota: ele instala as dependências com ele e escreve os
+comandos do README gerado na sintaxe dele.
+
+```
+$ pnpm create anvil@latest loja
+
+●  Gerenciador: pnpm
 ◇  Base criada
 ◇  Arquivos do projeto gerados
 ◇  Dependências instaladas
@@ -26,7 +52,7 @@ $ npm create anvil@latest loja
 └  Pronto.
 
    cd loja
-   npm run dev
+   pnpm dev
 ```
 
 ## O que você escolhe
@@ -45,11 +71,12 @@ $ npm create anvil@latest loja
 Dois presets cobrem os extremos:
 
 ```bash
-npm create anvil@latest meu-app -- --preset=minimal   # Vite, React, TS, Tailwind, Oxlint, Prettier
-npm create anvil@latest meu-app -- --preset=full      # tudo ligado, com ESLint no lugar do Oxlint
+pnpm create anvil@latest meu-app --preset=minimal   # Vite, React, TS, Tailwind, Oxlint, Prettier
+pnpm create anvil@latest meu-app --preset=full      # tudo ligado, com ESLint no lugar do Oxlint
 ```
 
-Uma flag explícita vence o preset, então `--preset=full --router=none` faz o que parece.
+Uma flag explícita vence o preset, então `--preset=full --router=none` faz o que parece. Só o `npm`
+exige separar as flags com `--`: `npm create anvil@latest meu-app -- --preset=full`.
 
 <details>
 <summary><b>Todas as opções</b></summary>
@@ -61,7 +88,7 @@ Uma flag explícita vence o preset, então `--preset=full --router=none` faz o q
 | `--router <none\|react-router\|tanstack>` | Roteamento. `react-router` usa a v8 em modo biblioteca; `tanstack` usa rotas por arquivo.     |
 | `--linter <oxlint\|eslint\|biome>`        | Padrão `oxlint`, que é o que o create-vite já entrega.                                        |
 | `--preset <minimal\|full>`                | Conjunto pronto de escolhas.                                                                  |
-| `--pm <npm\|pnpm\|yarn\|bun>`             | Força o gerenciador de pacotes.                                                               |
+| `--pm <pnpm\|npm\|yarn\|bun>`             | Força o gerenciador. Sem a flag, vale o que você usou para invocar o CLI.                     |
 | `--query` / `--no-query`                  | TanStack Query, com um módulo de exemplo em `src/api/posts/`.                                 |
 | `--tailwind` / `--no-tailwind`            | TailwindCSS v4.                                                                               |
 | `--shadcn` / `--no-shadcn`                | shadcn/ui, configurado sem rodar o `shadcn init`.                                             |
