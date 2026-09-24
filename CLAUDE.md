@@ -23,6 +23,7 @@ npm run build && npm run test:e2e   # e2e: gera projetos de verdade (lento, com 
 npm run typecheck
 npm run lint
 npm run build      # tsup -> dist/index.js
+npm run options:sync   # regenera site/src/data/options.json a partir de src/cli/options.ts
 ```
 
 ## A regra que sustenta o projeto
@@ -55,6 +56,11 @@ no escopo de módulo** — quando `main` morava no `index.ts`, importá-lo nos t
 Crie um arquivo em `src/features/` exportando um `Feature` e registre-o em `registry.ts`. O tipo
 `Feature` (em `src/plan/types.ts`) cobre dependências, arquivos, scripts, **remoções** e as
 contribuições para arquivos compartilhados.
+
+Se a feature virar escolha do usuário, declare-a em **`src/cli/options.ts`** — o manifesto de
+opções. Ele é a fonte única de rótulos, dicas, padrões e dependências entre opções: o `resolve.ts`
+tira dele as mensagens de prompt, e o site monta o construtor de comando a partir dele. Depois rode
+`npm run options:sync`.
 
 **Remoção é contribuição de primeira classe.** Escolher ESLint ou Biome precisa remover o `oxlint`,
 o `.oxlintrc.json` e reescrever o script `lint` — por isso existem `removeDependencies`,
@@ -174,6 +180,25 @@ workspace do CLI.
 - **Os comandos por gerenciador saem de `site/src/lib/package-managers.ts`** e precisam bater com o
   `runScript` de `src/env/package-manager.ts`: a página mostra a saída real do CLI, então `bun` é
   `bun run dev` e `pnpm` é `pnpm dev`. A ordem das abas — pnpm, npm, yarn, bun — é a mesma do README.
+- **O construtor de comando lê `site/src/data/options.json`**, que é _gerado_ a partir de
+  `src/cli/options.ts` pelo snapshot de `tests/unit/cli/options.test.ts`. Mexeu nas opções do CLI,
+  rode `npm run options:sync`; sem isso o `npm test` falha apontando o arquivo velho. Nunca edite o
+  JSON à mão.
+- **`site/src/lib/options.ts` e `site/src/lib/command.ts` são importados pelos testes do CLI**
+  (`tests/unit/cli/site-command.test.ts`), que fecham o ciclo: pegam o comando que o site monta e
+  conferem no `resolveSelection` de verdade que ele reproduz a seleção. Por isso esses dois usam
+  import relativo em vez de `@/` e **não podem depender do `node_modules` do site** — o CI do CLI
+  roda sem ele.
+- A ordem de precedência que o site replica é a do `resolve.ts`: flag explícita > preset >
+  `PRESETS.minimal`. **O `prettier`, o `git` e o `install` ignoram o preset** (`presetAware: false`
+  no manifesto), e o Biome zera o `prettier` seja qual for a flag.
+- **O comando do construtor gruda no rodapé com `sticky bottom-…` e precisa ser o último filho do
+  wrapper que contém a lista.** O sticky só se desloca dentro do próprio container: com `bottom`, o
+  espaço que conta é o que está acima (a lista inteira); com `top`, é o que está abaixo — que no
+  último filho não existe, e o sticky vira no-op sem aviso nenhum.
+- Os rótulos do manifesto aparecem nos dois lugares, no site e nos prompts do CLI — escreva-os para
+  funcionar nos dois. O linter se chama só `Oxlint`, por exemplo: o Prettier tem switch próprio no
+  site, e um `Oxlint + Prettier` mentiria quando ele fosse desligado.
 - Os componentes de `site/src/components/ui/` vêm do registro do shadcn sem edição.
 
 ## Publicação

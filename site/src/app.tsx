@@ -1,13 +1,13 @@
-import { Check, Copy, Moon, RotateCcw, SquareTerminal, Sun } from 'lucide-react';
+import { Moon, RotateCcw, Sun } from 'lucide-react';
 import { useState } from 'react';
 
+import { CommandBlock } from '@/components/command-block';
 import { Logo } from '@/components/logo';
+import { PresetBuilder } from '@/components/preset-builder';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   createCommand,
   DEFAULT_PACKAGE_MANAGER,
-  PACKAGE_MANAGERS,
   runCommand,
   type PackageManager,
 } from '@/lib/package-managers';
@@ -32,20 +32,6 @@ function sessionFor(packageManager: PackageManager) {
     { kind: 'hint', text: runCommand(packageManager, 'dev') },
   ];
 }
-
-const CHOICES = [
-  {
-    label: 'Roteamento',
-    value: 'Nenhum, React Router v8 ou TanStack Router com rotas por arquivo',
-  },
-  { label: 'Dados', value: 'TanStack Query, com um módulo de exemplo já no padrão de query-keys' },
-  { label: 'Lint e formato', value: 'Oxlint, ESLint ou Biome, com Prettier quando faz sentido' },
-  { label: 'Interface', value: 'TailwindCSS v4 e shadcn/ui configurado sem prompt' },
-  { label: 'Ambiente', value: 'Variáveis validadas com zod e cliente HTTP com proxy no dev' },
-  { label: 'Testes', value: 'Vitest e Testing Library, com cobertura e typecheck dos testes' },
-  { label: 'Estado e formulários', value: 'Zustand, react-hook-form e zod' },
-  { label: 'Repositório', value: 'git init com commit inicial, husky e workflow de CI' },
-];
 
 function Ambience() {
   return (
@@ -80,64 +66,6 @@ function ThemeToggle() {
       <Sun className="hidden size-4 dark:block" />
       <Moon className="size-4 dark:hidden" />
     </Button>
-  );
-}
-
-function InstallCommand({
-  packageManager,
-  onSelect,
-}: {
-  packageManager: PackageManager;
-  onSelect: (value: PackageManager) => void;
-}) {
-  const [copied, setCopied] = useState(false);
-  const command = createCommand(packageManager, 'meu-app');
-
-  async function copy() {
-    await navigator.clipboard.writeText(command);
-    setCopied(true);
-    window.setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  }
-
-  return (
-    <Tabs
-      value={packageManager}
-      onValueChange={(value) => {
-        onSelect(value as PackageManager);
-      }}
-      className="max-w-xl gap-0 overflow-hidden rounded-xl glass shadow-sm"
-    >
-      <div className="flex items-center gap-1 border-b px-2 py-1">
-        <SquareTerminal className="mx-1.5 size-4 shrink-0 text-muted-foreground" />
-        <TabsList className="bg-transparent p-0">
-          {PACKAGE_MANAGERS.map((name) => (
-            <TabsTrigger key={name} value={name} className="px-3 font-mono text-xs">
-              {name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => void copy()}
-          aria-label={`Copiar: ${command}`}
-          className="ml-auto"
-        >
-          {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-        </Button>
-      </div>
-
-      {PACKAGE_MANAGERS.map((name) => (
-        <TabsContent key={name} value={name} className="overflow-x-auto px-4 py-3.5">
-          <code className="font-mono text-sm whitespace-nowrap">
-            <span className="text-primary select-none">$ </span>
-            {createCommand(name, 'meu-app')}
-          </code>
-        </TabsContent>
-      ))}
-    </Tabs>
   );
 }
 
@@ -272,31 +200,22 @@ export function App() {
             </p>
 
             <div className="mt-10 rise" style={{ animationDelay: '260ms' }}>
-              <InstallCommand packageManager={packageManager} onSelect={setPackageManager} />
+              <CommandBlock
+                packageManager={packageManager}
+                onSelect={setPackageManager}
+                commandFor={(manager) => createCommand(manager, 'meu-app')}
+                className="max-w-xl"
+              />
             </div>
 
             <div className="mt-16 rise" style={{ animationDelay: '360ms' }}>
               <Terminal packageManager={packageManager} />
             </div>
 
-            <section className="mt-28">
-              <h2 className="text-2xl font-semibold tracking-tight">O que você escolhe</h2>
-              <dl className="mt-8 border-t">
-                {CHOICES.map((choice) => (
-                  <div
-                    key={choice.label}
-                    className="grid gap-1 border-b px-2 py-4 transition-colors hover:bg-card/60 sm:grid-cols-[13rem_1fr] sm:gap-6"
-                  >
-                    <dt className="font-medium">{choice.label}</dt>
-                    <dd className="text-muted-foreground">{choice.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="mt-6 max-w-xl text-sm text-muted-foreground">
-                Cada escolha também é uma flag, então dá para rodar sem nenhuma pergunta em script
-                ou em integração contínua.
-              </p>
-            </section>
+            <PresetBuilder
+              packageManager={packageManager}
+              onSelectPackageManager={setPackageManager}
+            />
 
             <section className="mt-28">
               <div className="max-w-2xl rounded-2xl glass p-8 shadow-sm sm:p-10">

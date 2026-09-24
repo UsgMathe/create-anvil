@@ -51,6 +51,7 @@
     "test": "vitest run --project unit --project gen",
     "test:watch": "vitest --project unit",
     "test:e2e": "vitest run --project e2e",
+    "options:sync": "vitest run --project unit -u tests/unit/cli/options.test.ts",
     "prepack": "npm run build && publint"
   },
   "devDependencies": {

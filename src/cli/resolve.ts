@@ -2,6 +2,7 @@ import { CliError } from '../errors.js';
 import type { LinterChoice, RouterChoice, Selection } from '../plan/types.js';
 import { validateProjectName } from '../validate/project-name.js';
 import type { BooleanFlag, RawArgs } from './args.js';
+import { LINTER_OPTION, ROUTER_OPTION, optionByKey, promptMessage } from './options.js';
 import { PRESETS, isPresetName } from './presets.js';
 import type { Prompter } from './prompts.js';
 
@@ -60,10 +61,6 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
     });
   }
 
-  const FLAG_FOR: Partial<Record<string, BooleanFlag>> = {
-    githubActions: 'gh-actions',
-  };
-
   const askBoolean = async (
     key:
       | 'tailwind'
@@ -76,13 +73,12 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
       | 'githubActions'
       | 'env'
       | 'api',
-    message: string,
   ): Promise<boolean> => {
-    const flagged = args.booleans[FLAG_FOR[key] ?? (key as BooleanFlag)];
+    const flagged = args.booleans[optionByKey(key).flag as BooleanFlag];
     if (typeof flagged === 'boolean') return flagged;
     const fallback = (preset?.[key] ?? DEFAULTS[key]) as boolean;
     if (!interactive) return fallback;
-    return prompter.confirm({ message, initial: fallback });
+    return prompter.confirm({ message: promptMessage(key), initial: fallback });
   };
 
   let router: RouterChoice;
@@ -92,13 +88,13 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
     router = preset.router;
   } else if (interactive) {
     router = await prompter.select<RouterChoice>({
-      message: 'Roteamento',
+      message: ROUTER_OPTION.label,
       initial: (preset?.router ?? DEFAULTS.router) as RouterChoice,
-      choices: [
-        { value: 'none', label: 'Nenhum', hint: 'app de página única' },
-        { value: 'react-router', label: 'React Router', hint: 'v8, modo biblioteca' },
-        { value: 'tanstack', label: 'TanStack Router', hint: 'rotas por arquivo, tipado' },
-      ],
+      choices: ROUTER_OPTION.choices.map((choice) => ({
+        value: choice.value as RouterChoice,
+        label: choice.label,
+        hint: choice.hint,
+      })),
     });
   } else {
     router = (preset?.router ?? DEFAULTS.router) as RouterChoice;
@@ -109,28 +105,28 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
     linter = assertChoice(args.linter, LINTERS, 'linter');
   } else if (interactive) {
     linter = await prompter.select<LinterChoice>({
-      message: 'Lint e formatação',
+      message: LINTER_OPTION.label,
       initial: (preset?.linter ?? DEFAULTS.linter) as LinterChoice,
-      choices: [
-        { value: 'oxlint', label: 'Oxlint + Prettier', hint: 'o padrão do create-vite' },
-        { value: 'eslint', label: 'ESLint + Prettier', hint: 'ecossistema de plugins' },
-        { value: 'biome', label: 'Biome', hint: 'sem ordenação de classes Tailwind' },
-      ],
+      choices: LINTER_OPTION.choices.map((choice) => ({
+        value: choice.value as LinterChoice,
+        label: choice.label,
+        hint: choice.hint,
+      })),
     });
   } else {
     linter = (preset?.linter ?? DEFAULTS.linter) as LinterChoice;
   }
 
-  const tailwind = await askBoolean('tailwind', 'TailwindCSS v4?');
-  const query = await askBoolean('query', 'TanStack Query?');
-  const shadcn = await askBoolean('shadcn', 'shadcn/ui?');
-  const vitest = await askBoolean('vitest', 'Vitest + Testing Library?');
-  const zustand = await askBoolean('zustand', 'Zustand?');
-  const forms = await askBoolean('forms', 'react-hook-form + zod?');
-  const husky = await askBoolean('husky', 'husky + lint-staged?');
-  const githubActions = await askBoolean('githubActions', 'Workflow de CI no projeto gerado?');
-  const envValidation = await askBoolean('env', 'Validação de variáveis de ambiente com zod?');
-  const api = await askBoolean('api', 'Cliente HTTP com proxy de /api no dev?');
+  const tailwind = await askBoolean('tailwind');
+  const query = await askBoolean('query');
+  const shadcn = await askBoolean('shadcn');
+  const vitest = await askBoolean('vitest');
+  const zustand = await askBoolean('zustand');
+  const forms = await askBoolean('forms');
+  const husky = await askBoolean('husky');
+  const githubActions = await askBoolean('githubActions');
+  const envValidation = await askBoolean('env');
+  const api = await askBoolean('api');
 
   const prettier = linter === 'biome' ? false : (args.booleans.prettier ?? true);
 

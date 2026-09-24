@@ -78,6 +78,10 @@ pnpm create anvil@latest meu-app --preset=full      # tudo ligado, com ESLint no
 Uma flag explícita vence o preset, então `--preset=full --router=none` faz o que parece. Só o `npm`
 exige separar as flags com `--`: `npm create anvil@latest meu-app -- --preset=full`.
 
+Se preferir clicar a decorar flag, **o site monta o comando para você**:
+[usgmathe.github.io/create-anvil](https://usgmathe.github.io/create-anvil/#monte-o-seu-comando) —
+marque o que quer e copie a linha pronta, já na sintaxe do seu gerenciador.
+
 <details>
 <summary><b>Todas as opções</b></summary>
 
