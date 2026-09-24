@@ -1,3 +1,4 @@
+import { parse } from 'jsonc-parser';
 import { describe, expect, it } from 'vitest';
 
 import { buildPlan } from '../../../src/plan/build.js';
@@ -165,6 +166,24 @@ describe('o typecheck precisa realmente checar', () => {
     const root = fileNamed('tsconfig.json', buildPlan(selectionOf(), base));
     expect(root).toContain('"files": []');
     expect(root).toContain('references');
+  });
+
+  it('com vitest, a raiz referencia o tsconfig.vitest.json por último, senão o editor não acha projeto para os testes', () => {
+    const root = parse(
+      fileNamed('tsconfig.json', buildPlan(selectionOf({ vitest: true }), base)),
+    ) as {
+      references: { path: string }[];
+    };
+    expect(root.references.map((reference) => reference.path)).toEqual([
+      './tsconfig.app.json',
+      './tsconfig.node.json',
+      './tsconfig.vitest.json',
+    ]);
+  });
+
+  it('sem vitest, a raiz não referencia um tsconfig que não existe', () => {
+    const root = fileNamed('tsconfig.json', buildPlan(selectionOf({ vitest: false }), base));
+    expect(root).not.toContain('tsconfig.vitest.json');
   });
 });
 

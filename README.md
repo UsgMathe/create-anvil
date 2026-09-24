@@ -132,9 +132,9 @@ companhia — quem manda nessas faixas é o time do Vite, não este CLI.
 - Um **README escrito a partir das escolhas** — a stack real, os comandos que existem, e as
   convenções que não são óbvias, entre elas que `enum` não compila porque o create-vite liga o
   `erasableSyntaxOnly`.
-- Scripts coerentes com o que foi instalado: `dev` e `preview` sobem com `--host`; `typecheck`;
-  `lint`/`lint:fix`; `format`/`format:check`; e, com Vitest, `test`, `test:watch`, `test:coverage`
-  e `test:types`.
+- Scripts coerentes com o que foi instalado: `dev` e `preview` sobem com `--host`; `typecheck`,
+  que com Vitest cobre também os testes; `lint`/`lint:fix`; `format`/`format:check`; e, com Vitest,
+  `test`, `test:watch` e `test:coverage`.
 - Com `--env` e `--api`, o `http` aponta para `/api` em desenvolvimento e o Vite encaminha para a
   `VITE_API_URL` — sem CORS e preservando o cookie de sessão. Em produção ele vai direto.
 

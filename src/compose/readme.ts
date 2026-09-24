@@ -19,7 +19,6 @@ const SCRIPT_DESCRIPTIONS: Record<string, string> = {
   test: 'Roda os testes uma vez.',
   'test:watch': 'Roda os testes em watch.',
   'test:coverage': 'Testes com relatório de cobertura.',
-  'test:types': 'Typecheck dos arquivos de teste.',
   prepare: 'Instala os hooks de git (roda sozinho no install).',
 };
 
@@ -104,9 +103,10 @@ function conventions(selection: Selection): string[] {
 
   if (selection.vitest) {
     items.push(
-      'Os testes ficam ao lado do código (`*.test.ts`/`*.test.tsx`), sem pasta `__tests__`. O' +
-        ' `tsconfig.app.json` os exclui de propósito, para o build de produção não typecheckar' +
-        ' teste — quem faz isso é o `test:types`.',
+      'Os testes ficam ao lado do código (`*.test.ts`/`*.test.tsx`), sem pasta `__tests__`, e' +
+        ' usam o `tsconfig.vitest.json`. Ele é referenciado pelo `tsconfig.json`, então o editor' +
+        ' enxerga os matchers do jest-dom e o `typecheck` cobre os testes — sem que os tipos de' +
+        ' teste vazem para o código do app, que continua no `tsconfig.app.json`.',
     );
   }
 

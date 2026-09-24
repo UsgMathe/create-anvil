@@ -141,9 +141,14 @@ combinações em milissegundos.
 - **A feature `api` exige a `env`**, porque `src/lib/http.ts` importa `@/config/env`. O `baseURL` é
   `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
   sessão preservado), em produção vai direto.
-- **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json` próprio,
-  rodado pelo script `test:types`. O build de produção deixa de typecheckar teste. O `test:types`
-  entra no CI do projeto gerado — script que ninguém roda é script que mente.
+- **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json`
+  próprio, e **o `tsconfig.json` da raiz precisa referenciá-lo, por último**. O editor só acha
+  projeto para um arquivo pelas `references` da raiz; sem ela, o teste cai num projeto inferido,
+  sem o `src/test/setup.ts`, e o `toBeInTheDocument` do jest-dom some — erro que o `tsc -p` não
+  mostra. Tem que ser a última porque o tsserver usa o primeiro projeto que contém o arquivo, e o
+  `tsconfig.vitest.json` inclui `src` inteiro: antes do `app`, o código do app enxergaria os tipos
+  de teste. A consequência é que o `tsc -b` (no `typecheck` e no `build`) cobre os testes, por isso
+  não existe script `test:types`.
 
 - **`git init` antes do install.** O `prepare` do husky roda durante o install e exige `.git`.
 - **Formatação depois do install**, rodando o `format` do próprio projeto gerado. Templates escritos

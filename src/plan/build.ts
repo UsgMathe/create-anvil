@@ -2,10 +2,10 @@ import { composeIndexCss } from '../compose/index-css.js';
 import { composeMainTsx } from '../compose/main-tsx.js';
 import { composePackageJson, renderPackageJson } from '../compose/package-json.js';
 import { composeReadme } from '../compose/readme.js';
-import { addExcludes, addExplicitStrict, addPathAlias } from '../compose/tsconfig.js';
+import { addExcludes, addExplicitStrict, addPathAlias, addReference } from '../compose/tsconfig.js';
 import { composeViteConfig } from '../compose/vite-config.js';
 import { FEATURES } from '../features/registry.js';
-import { TEST_FILE_GLOBS } from '../features/testing.js';
+import { TEST_FILE_GLOBS, VITEST_TSCONFIG } from '../features/testing.js';
 import { CliError } from '../errors.js';
 import type {
   BaseTree,
@@ -145,6 +145,9 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
     const source = base[tsconfigPath];
     if (source === undefined) continue;
     let contents = addPathAlias(source);
+    if (tsconfigPath === 'tsconfig.json' && selection.vitest) {
+      contents = addReference(contents, `./${VITEST_TSCONFIG}`);
+    }
     if (tsconfigPath === 'tsconfig.app.json') {
       contents = addExplicitStrict(contents);
       if (selection.vitest) contents = addExcludes(contents, TEST_FILE_GLOBS);

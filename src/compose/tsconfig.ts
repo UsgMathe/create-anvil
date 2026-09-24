@@ -5,14 +5,20 @@ const FORMATTING = { formattingOptions: { tabSize: 2, insertSpaces: true, eol: '
 export interface TsconfigEdit {
   path: (string | number)[];
   value: unknown;
+  insert?: boolean;
 }
 
 export function editJsonc(source: string, edits: TsconfigEdit[]): string {
   let result = source;
   for (const edit of edits) {
-    result = applyEdits(result, modify(result, edit.path, edit.value, FORMATTING));
+    const options = { ...FORMATTING, isArrayInsertion: edit.insert ?? false };
+    result = applyEdits(result, modify(result, edit.path, edit.value, options));
   }
   return result.endsWith('\n') ? result : `${result}\n`;
+}
+
+export function addReference(source: string, path: string): string {
+  return editJsonc(source, [{ path: ['references', -1], value: { path }, insert: true }]);
 }
 
 export function addPathAlias(source: string): string {

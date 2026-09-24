@@ -56,6 +56,8 @@ const TEST_BLOCK = `  test: {
     },
   },`;
 
+export const VITEST_TSCONFIG = 'tsconfig.vitest.json';
+
 export const TEST_FILE_GLOBS = [
   'src/**/*.test.ts',
   'src/**/*.test.tsx',
@@ -80,13 +82,12 @@ export const testing: Feature = {
   files: () => [
     { path: 'src/test/setup.ts', contents: SETUP_TS },
     { path: 'src/test/smoke.test.tsx', contents: SMOKE_TEST },
-    { path: 'tsconfig.vitest.json', contents: TSCONFIG_VITEST },
+    { path: VITEST_TSCONFIG, contents: TSCONFIG_VITEST },
   ],
   scripts: () => ({
     test: 'vitest run',
     'test:watch': 'vitest',
     'test:coverage': 'vitest run --coverage',
-    'test:types': 'tsc -p tsconfig.vitest.json --noEmit',
   }),
   viteTestBlock: () => TEST_BLOCK,
 };
