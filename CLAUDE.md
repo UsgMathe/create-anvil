@@ -118,6 +118,9 @@ combinações em milissegundos.
   a ordem original falha num projeto recém-criado, antes de o `vite` ter rodado uma vez.
 - **`react-refresh/only-export-components` desligado em `src/routes/**`.** Arquivos de rota do
   TanStack exportam `Route` e nenhum componente; `allowExportNames` não resolve esse caso.
+- **Biome com Tailwind precisa de `css.parser.tailwindDirectives`.** Sem isso, o `@theme`, o
+  `@apply` e o `@custom-variant` que o tema do shadcn escreve são erro de parse, o `biome format`
+  pós-install aborta e o CLI reverte a pasta inteira.
 - **O shadcn é gerado por nós, sem rodar `shadcn init`.** Escrevemos `components.json` e
   `src/lib/utils.ts`. O registro atual usa o pacote **`cn`** (não mais `clsx` + `tailwind-merge`) e
   o **`radix-ui`** unificado — confira em `r/styles/new-york-v4/index.json` antes de mexer.

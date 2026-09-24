@@ -1,8 +1,8 @@
-import type { Feature } from '../plan/types.js';
+import type { Feature, FeatureContext } from '../plan/types.js';
 import { entries } from './versions.js';
 
-const BIOME_JSON = `${JSON.stringify(
-  {
+function biomeJson(context: FeatureContext): string {
+  const config = {
     $schema: 'https://biomejs.dev/schemas/2.5.14/schema.json',
     vcs: { enabled: true, clientKind: 'git', useIgnoreFile: true },
     files: { ignoreUnknown: false, includes: ['**', '!dist', '!coverage', '!public'] },
@@ -12,10 +12,11 @@ const BIOME_JSON = `${JSON.stringify(
     javascript: {
       formatter: { quoteStyle: 'single', semicolons: 'always', trailingCommas: 'all' },
     },
-  },
-  null,
-  2,
-)}\n`;
+    ...(context.selection.tailwind ? { css: { parser: { tailwindDirectives: true } } } : {}),
+  };
+
+  return `${JSON.stringify(config, null, 2)}\n`;
+}
 
 export const lintBiome: Feature = {
   id: 'lint-biome',
@@ -23,7 +24,7 @@ export const lintBiome: Feature = {
   devDependencies: () => entries(['@biomejs/biome']),
   removeDependencies: () => ['oxlint'],
   removeFiles: () => ['.oxlintrc.json'],
-  files: () => [{ path: 'biome.json', contents: BIOME_JSON }],
+  files: (context) => [{ path: 'biome.json', contents: biomeJson(context) }],
   scripts: () => ({
     lint: 'biome lint',
     'lint:fix': 'biome lint --write',

@@ -116,6 +116,20 @@ describe('lint e format', () => {
     expect(plan.packageJson.scripts?.lint).toBe('eslint .');
   });
 
+  it('com biome e tailwind, o parser de CSS aceita as diretivas do Tailwind v4', () => {
+    const config = JSON.parse(
+      fileNamed('biome.json', buildPlan(selectionOf({ linter: 'biome', tailwind: true }), base)),
+    ) as { css?: { parser?: { tailwindDirectives?: boolean } } };
+    expect(config.css?.parser?.tailwindDirectives).toBe(true);
+  });
+
+  it('com biome sem tailwind, não liga um parser que nada usa', () => {
+    const config = JSON.parse(
+      fileNamed('biome.json', buildPlan(selectionOf({ linter: 'biome', tailwind: false }), base)),
+    ) as Record<string, unknown>;
+    expect(config).not.toHaveProperty('css');
+  });
+
   it('remove o oxlint e o prettier ao escolher biome', () => {
     const plan = buildPlan(selectionOf({ linter: 'biome' }), base);
     expect(plan.packageJson.devDependencies).not.toHaveProperty('oxlint');
