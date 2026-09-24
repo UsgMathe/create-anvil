@@ -12,8 +12,8 @@
   --card-foreground: oklch(0.205 0.016 252);
   --popover: oklch(0.995 0.002 250);
   --popover-foreground: oklch(0.205 0.016 252);
-  --primary: oklch(0.708 0.164 62);
-  --primary-foreground: oklch(0.185 0.032 62);
+  --primary: oklch(0.54 0.14 62);
+  --primary-foreground: oklch(0.985 0.01 62);
   --secondary: oklch(0.925 0.005 250);
   --secondary-foreground: oklch(0.242 0.018 252);
   --muted: oklch(0.925 0.005 250);
@@ -22,8 +22,8 @@
   --accent-foreground: oklch(0.242 0.018 252);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.882 0.007 250);
-  --input: oklch(0.882 0.007 250);
-  --ring: oklch(0.708 0.164 62);
+  --input: oklch(0.78 0.012 250);
+  --ring: oklch(0.54 0.14 62);
 
   --slab: oklch(0.205 0.018 254);
   --slab-border: oklch(0.262 0.02 254);
@@ -118,11 +118,37 @@
 
   html {
     scroll-behavior: smooth;
+    scrollbar-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent) transparent;
   }
 
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 26%, transparent);
+    color: var(--foreground);
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--muted-foreground) 60%, transparent);
   }
 }
 
