@@ -1,6 +1,17 @@
 import type { Feature, FeatureContext } from '../plan/types.js';
 import { entries } from './versions.js';
 
+const REGISTRY_OVERRIDE = {
+  includes: ['src/components/ui/**'],
+  linter: {
+    rules: {
+      a11y: { useSemanticElements: 'off' },
+      style: { useImportType: 'off' },
+      suspicious: { noArrayIndexKey: 'off', noDoubleEquals: 'off' },
+    },
+  },
+};
+
 function biomeJson(context: FeatureContext): string {
   const config = {
     $schema: 'https://biomejs.dev/schemas/2.5.14/schema.json',
@@ -13,6 +24,7 @@ function biomeJson(context: FeatureContext): string {
       formatter: { quoteStyle: 'single', semicolons: 'always', trailingCommas: 'all' },
     },
     ...(context.selection.tailwind ? { css: { parser: { tailwindDirectives: true } } } : {}),
+    ...(context.selection.shadcn ? { overrides: [REGISTRY_OVERRIDE] } : {}),
   };
 
   return `${JSON.stringify(config, null, 2)}\n`;

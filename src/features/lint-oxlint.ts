@@ -1,12 +1,20 @@
 import type { Feature, FeatureContext } from '../plan/types.js';
 
-function exportOverrides(context: FeatureContext) {
-  const paths: string[] = [];
-  if (context.selection.router === 'tanstack') paths.push('src/routes/**');
-  if (context.selection.shadcn) paths.push('src/components/ui/**');
+function overrides(context: FeatureContext) {
+  const entries: { files: string[]; rules: Record<string, string> }[] = [];
 
-  if (paths.length === 0) return [];
-  return [{ files: paths, rules: { 'react/only-export-components': 'off' } }];
+  if (context.selection.router === 'tanstack') {
+    entries.push({ files: ['src/routes/**'], rules: { 'react/only-export-components': 'off' } });
+  }
+
+  if (context.selection.shadcn) {
+    entries.push({
+      files: ['src/components/ui/**'],
+      rules: { 'react/only-export-components': 'off', 'jsx-a11y/prefer-tag-over-role': 'off' },
+    });
+  }
+
+  return entries;
 }
 
 function oxlintrc(context: FeatureContext): string {
@@ -24,7 +32,7 @@ function oxlintrc(context: FeatureContext): string {
       'import/no-unassigned-import': 'off',
     },
     ignorePatterns,
-    overrides: exportOverrides(context),
+    overrides: overrides(context),
   };
 
   return `${JSON.stringify(config, null, 2)}\n`;

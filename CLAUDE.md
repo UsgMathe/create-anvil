@@ -118,6 +118,10 @@ combinações em milissegundos.
   a ordem original falha num projeto recém-criado, antes de o `vite` ter rodado uma vez.
 - **`react-refresh/only-export-components` desligado em `src/routes/**`.** Arquivos de rota do
   TanStack exportam `Route` e nenhum componente; `allowExportNames` não resolve esse caso.
+- **`src/components/ui/**` tem override próprio nos linters**, porque é código do registro e não
+  nosso. No Oxlint, além do `only-export-components`, ele desliga o
+  `jsx-a11y/prefer-tag-over-role`: o `Field` do shadcn usa `<div role="group">`, ARIA válido que a
+  regra trata como erro. O override vale só para essa pasta — no código do usuário a regra fica.
 - **Biome com Tailwind precisa de `css.parser.tailwindDirectives`.** Sem isso, o `@theme`, o
   `@apply` e o `@custom-variant` que o tema do shadcn escreve são erro de parse, o `biome format`
   pós-install aborta e o CLI reverte a pasta inteira.
@@ -129,6 +133,16 @@ combinações em milissegundos.
   utility class"_ e o build inteiro quebra. As variáveis vêm de `r/colors/neutral.json` (campo
   `cssVarsV4`), e o `@theme inline` que as transforma em utilitários é gerado a partir delas.
   Para atualizar o tema, regenere `shadcn-theme.ts` a partir desse endpoint — não edite à mão.
+- **A feature `shadcn` é a dona de `src/components/ui/`.** Ela escreve os componentes que as
+  features selecionadas pedem (`componentsFor` em `src/features/shadcn.ts`); hoje, o `forms` pede
+  `field`, `input`, `button`, `label` e `separator`. Uma feature que precise de componente o declara
+  ali em vez de escrever o arquivo: duas features escrevendo o mesmo `button.tsx` fazem o
+  `buildPlan` lançar, e ali o componente sai uma vez só.
+- **`src/features/shadcn-ui.ts` é o registro copiado, não código nosso.** Cada componente vem de
+  `r/styles/new-york-v4/<nome>.json` com o que o `shadcn add` faria num projeto `rsc: false`: sem o
+  `"use client"` e com `@/registry/new-york-v4/ui/` trocado por `@/components/ui/`. Para atualizar,
+  regenere a partir do registro — não edite à mão. O exemplo de formulário com shadcn segue o guia
+  _React Hook Form_ deles: `<Controller>` + `<Field>`, não o `form.tsx` antigo.
 - **A feature `env` depende da ordem no `.gitignore`.** O `base` contribui `*.env` e o `env`
   contribui `!sample.env`; a negação só funciona **depois** do padrão que ela nega. A ordem vem da
   posição no `FEATURES` de `registry.ts` (base primeiro), e há teste garantindo isso — reordenar o
@@ -170,7 +184,9 @@ Três projetos do vitest, definidos em `vitest.config.ts`:
   pnpm é o ambiente do mantenedor, e o job de e2e no CI instala o `pnpm/action-setup` por isso).
   **Exige `npm run build`
   antes**, porque invoca `dist/index.js`; o teste falha com uma mensagem clara se o bundle não
-  existir. Leva alguns minutos (um `npm install` por combinação), então roda só no CI.
+  existir. Leva alguns minutos (um `npm install` por combinação), então roda só no CI. **Todo
+  linter precisa de ao menos uma combinação com `--shadcn --forms`**: o código do registro é o que
+  mais briga com regra de linter, e um linter sem essa combinação quebra sem o CI perceber.
 
 A fixture em `tests/fixtures/create-vite@9.2.1/` é a saída real do create-vite, com os renomes
 (`_gitignore` → `.gitignore`) aplicados no carregamento. O nome da pasta tem a versão de propósito:

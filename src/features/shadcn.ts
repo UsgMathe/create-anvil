@@ -1,6 +1,13 @@
-import type { Feature } from '../plan/types.js';
+import type { Feature, Selection } from '../plan/types.js';
 import { SHADCN_THEME_CSS } from './shadcn-theme.js';
+import { SHADCN_UI, type ShadcnComponent } from './shadcn-ui.js';
 import { entries } from './versions.js';
+
+const FORM_COMPONENTS: ShadcnComponent[] = ['button', 'input', 'label', 'separator', 'field'];
+
+function componentsFor(selection: Selection): ShadcnComponent[] {
+  return selection.forms ? FORM_COMPONENTS : [];
+}
 
 const COMPONENTS_JSON = `${JSON.stringify(
   {
@@ -44,9 +51,13 @@ export const shadcn: Feature = {
   enabled: (selection) => selection.shadcn,
   dependencies: () => entries(['class-variance-authority', 'cn', 'lucide-react', 'radix-ui']),
   devDependencies: () => entries(['tw-animate-css', 'shadcn']),
-  files: () => [
+  files: ({ selection }) => [
     { path: 'components.json', contents: COMPONENTS_JSON },
     { path: 'src/lib/utils.ts', contents: UTILS_TS },
+    ...componentsFor(selection).map((name) => ({
+      path: `src/components/ui/${name}.tsx`,
+      contents: SHADCN_UI[name],
+    })),
   ],
   cssBlocks: () => [
     { order: 10, content: '@import "tw-animate-css";' },

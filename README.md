@@ -99,7 +99,7 @@ marque o que quer e copie a linha pronta, já na sintaxe do seu gerenciador.
 | `--prettier` / `--no-prettier`            | Prettier.                                                                                     |
 | `--vitest` / `--no-vitest`                | Vitest + Testing Library, com cobertura e typecheck dos testes.                               |
 | `--zustand` / `--no-zustand`              | Zustand.                                                                                      |
-| `--forms` / `--no-forms`                  | react-hook-form + zod.                                                                        |
+| `--forms` / `--no-forms`                  | react-hook-form + zod, com um formulário de exemplo — em shadcn/ui, se ele estiver ligado.    |
 | `--husky` / `--no-husky`                  | husky + lint-staged.                                                                          |
 | `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado.                                                             |
 | `--env` / `--no-env`                      | Valida as variáveis de ambiente com zod: `sample.env`, `.env` e `src/config/env.ts`.          |

@@ -106,6 +106,82 @@ describe('features opcionais', () => {
   });
 });
 
+describe('formulário de exemplo com shadcn', () => {
+  const UI_COMPONENTS = ['button', 'input', 'label', 'separator', 'field'].map(
+    (name) => `src/components/ui/${name}.tsx`,
+  );
+
+  function importsOf(source: string): string[] {
+    return [...source.matchAll(/from ['"]([^'"]+)['"]/g)].map((match) => match[1] ?? '');
+  }
+
+  function packageName(specifier: string): string {
+    const parts = specifier.split('/');
+    return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : (parts[0] ?? '');
+  }
+
+  it('com forms e shadcn, monta o exemplo com Field, Input e Button, como no guia do shadcn', () => {
+    const form = fileNamed('src/components/contact-form.tsx', { forms: true, shadcn: true });
+    expect(form).toContain("from '@/components/ui/field'");
+    expect(form).toContain("from '@/components/ui/input'");
+    expect(form).toContain("from '@/components/ui/button'");
+    expect(form).toContain('<Controller');
+    expect(form).toContain('<FieldError');
+    expect(plannedPaths({ forms: true, shadcn: true })).toEqual(
+      expect.arrayContaining(UI_COMPONENTS),
+    );
+  });
+
+  it('sem shadcn, o exemplo continua em HTML e não escreve componentes', () => {
+    const form = fileNamed('src/components/contact-form.tsx', { forms: true, shadcn: false });
+    expect(form).not.toContain('@/components/ui');
+    expect(plannedPaths({ forms: true, shadcn: false }).some((path) => path.includes('/ui/'))).toBe(
+      false,
+    );
+  });
+
+  it('shadcn sem forms não escreve componente que ninguém usa', () => {
+    expect(plannedPaths({ forms: false, shadcn: true }).some((path) => path.includes('/ui/'))).toBe(
+      false,
+    );
+  });
+
+  it('todo import @/ do formulário e dos componentes aponta para um arquivo do plano', () => {
+    const plan = buildPlan(selectionOf({ forms: true, shadcn: true }), base);
+    const paths = new Set(plan.files.map((file) => file.path));
+    const written = plan.files.filter(
+      (file) => file.path === 'src/components/contact-form.tsx' || file.path.includes('/ui/'),
+    );
+
+    for (const file of written) {
+      for (const specifier of importsOf(file.contents).filter((entry) => entry.startsWith('@/'))) {
+        const target = `src/${specifier.slice(2)}`;
+        const exists = paths.has(`${target}.tsx`) || paths.has(`${target}.ts`);
+        expect(exists, `${file.path} importa ${specifier}`).toBe(true);
+      }
+    }
+  });
+
+  it('todo pacote importado pelo formulário e pelos componentes está declarado', () => {
+    const plan = buildPlan(selectionOf({ forms: true, shadcn: true }), base);
+    const declared = new Set([
+      ...Object.keys(plan.packageJson.dependencies ?? {}),
+      ...Object.keys(plan.packageJson.devDependencies ?? {}),
+    ]);
+    const written = plan.files.filter(
+      (file) => file.path === 'src/components/contact-form.tsx' || file.path.includes('/ui/'),
+    );
+
+    for (const file of written) {
+      for (const specifier of importsOf(file.contents).filter((entry) => !entry.startsWith('@/'))) {
+        expect(declared.has(packageName(specifier)), `${file.path} importa ${specifier}`).toBe(
+          true,
+        );
+      }
+    }
+  });
+});
+
 describe('preset completo', () => {
   it('mantém o manifesto coerente com tudo ligado', () => {
     const plan = buildPlan(

@@ -140,7 +140,7 @@ export const BOOLEAN_OPTIONS: BooleanOptionSpec[] = [
     key: 'forms',
     flag: 'forms',
     label: 'react-hook-form + zod',
-    hint: 'Formulários tipados, com o resolver de zod já ligado.',
+    hint: 'Formulário de exemplo validado por zod, em shadcn/ui quando ele estiver ligado.',
     group: 'data',
     presetAware: true,
     default: false,

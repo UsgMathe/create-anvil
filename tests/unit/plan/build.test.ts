@@ -123,6 +123,28 @@ describe('lint e format', () => {
     expect(config.css?.parser?.tailwindDirectives).toBe(true);
   });
 
+  it('com biome e shadcn, desliga só em src/components/ui as regras que o registro não segue', () => {
+    const config = JSON.parse(
+      fileNamed('biome.json', buildPlan(selectionOf({ linter: 'biome', shadcn: true }), base)),
+    ) as { overrides?: { includes: string[]; linter: { rules: Record<string, unknown> } }[] };
+
+    expect(config.overrides).toEqual([
+      {
+        includes: ['src/components/ui/**'],
+        linter: {
+          rules: {
+            a11y: { useSemanticElements: 'off' },
+            style: { useImportType: 'off' },
+            suspicious: { noArrayIndexKey: 'off', noDoubleEquals: 'off' },
+          },
+        },
+      },
+    ]);
+    expect(
+      JSON.parse(fileNamed('biome.json', buildPlan(selectionOf({ linter: 'biome' }), base))),
+    ).not.toHaveProperty('overrides');
+  });
+
   it('com biome sem tailwind, não liga um parser que nada usa', () => {
     const config = JSON.parse(
       fileNamed('biome.json', buildPlan(selectionOf({ linter: 'biome', tailwind: false }), base)),
@@ -233,5 +255,21 @@ describe('config do oxlint', () => {
 
     expect(config.rules['react/react-in-jsx-scope']).toBe('off');
     expect(config.rules['import/no-unassigned-import']).toBe('off');
+  });
+
+  it('com shadcn, aceita o role="group" do Field do registro só em src/components/ui', () => {
+    const config = JSON.parse(
+      fileNamed(
+        '.oxlintrc.json',
+        buildPlan(selectionOf({ shadcn: true, router: 'tanstack' }), base),
+      ),
+    ) as { overrides: { files: string[]; rules: Record<string, unknown> }[] };
+
+    const ui = config.overrides.find((entry) => entry.files.includes('src/components/ui/**'));
+    const routes = config.overrides.find((entry) => entry.files.includes('src/routes/**'));
+
+    expect(ui?.rules['jsx-a11y/prefer-tag-over-role']).toBe('off');
+    expect(ui?.rules['react/only-export-components']).toBe('off');
+    expect(routes?.rules).not.toHaveProperty('jsx-a11y/prefer-tag-over-role');
   });
 });

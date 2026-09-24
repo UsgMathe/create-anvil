@@ -94,6 +94,17 @@ function conventions(selection: Selection): string[] {
     );
   }
 
+  if (selection.forms) {
+    items.push(
+      selection.shadcn
+        ? '`src/components/contact-form.tsx` é a referência de formulário: schema zod no' +
+            ' `zodResolver`, cada campo num `<Controller>` com os componentes `Field` do shadcn, e o' +
+            ' erro vindo do schema via `<FieldError>`.'
+        : '`src/components/contact-form.tsx` é a referência de formulário: schema zod no' +
+            ' `zodResolver`, com a mensagem de erro de cada campo vinda do próprio schema.',
+    );
+  }
+
   if (selection.router === 'tanstack') {
     items.push(
       '`src/routeTree.gen.ts` é gerado pelo plugin do Vite. Por isso o `build` roda o `vite` antes' +

@@ -18,8 +18,8 @@ const COMBINATIONS: { name: string; pm: PackageManager; flags: string[] }[] = [
     flags: ['--router=tanstack', '--query', '--linter=eslint', '--vitest'],
   },
   { name: 'react-router', pm: 'npm', flags: ['--router=react-router', '--query'] },
-  { name: 'biome', pm: 'npm', flags: ['--router=none', '--linter=biome'] },
-  { name: 'shadcn', pm: 'npm', flags: ['--router=none', '--shadcn'] },
+  { name: 'biome', pm: 'npm', flags: ['--router=none', '--linter=biome', '--shadcn', '--forms'] },
+  { name: 'shadcn', pm: 'npm', flags: ['--router=none', '--shadcn', '--forms'] },
   {
     name: 'pnpm',
     pm: 'pnpm',
