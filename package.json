@@ -1,6 +1,6 @@
 {
   "name": "create-anvil",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "CLI to scaffold Vite + React + TypeScript + TailwindCSS projects, with optional routing, TanStack Query and shadcn/ui.",
   "license": "MIT",
   "author": "Matheus Gabriel Valenga",
