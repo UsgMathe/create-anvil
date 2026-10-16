@@ -72,6 +72,7 @@ export interface ProviderContribution {
   imports: ImportSpec[];
   open: string;
   close: string;
+  trailing?: string[];
 }
 
 export interface PreambleContribution {

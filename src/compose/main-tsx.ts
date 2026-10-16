@@ -29,13 +29,24 @@ export function composeMainTsx(input: MainTsxInput): string {
     { from: './index.css', sideEffect: true },
   ];
 
-  const openTags = ['<StrictMode>', ...providers.map((provider) => provider.open)];
-  const closeTags = [...providers.map((provider) => provider.close).reverse(), '</StrictMode>'];
+  const wrappers: ProviderContribution[] = [
+    { order: -Infinity, imports: [], open: '<StrictMode>', close: '</StrictMode>' },
+    ...providers,
+  ];
 
-  const body: string[] = [];
-  openTags.forEach((tag, index) => body.push(indent(index + 1, tag)));
-  body.push(indent(openTags.length + 1, input.rootElement.jsx));
-  closeTags.forEach((tag, index) => body.push(indent(openTags.length - index, tag)));
+  const renderLevel = (index: number): string[] => {
+    const level = index + 1;
+    const wrapper = wrappers[index];
+    if (!wrapper) return [indent(level, input.rootElement.jsx)];
+    return [
+      indent(level, wrapper.open),
+      ...renderLevel(index + 1),
+      ...(wrapper.trailing ?? []).map((line) => indent(level + 1, line)),
+      indent(level, wrapper.close),
+    ];
+  };
+
+  const body = renderLevel(0);
 
   const preambleCode = preamble.map((entry) => entry.code).filter(Boolean);
   const blocks = [renderImports(imports)];

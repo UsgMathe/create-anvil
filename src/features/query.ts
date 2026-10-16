@@ -100,10 +100,12 @@ export const query: Feature = {
       order: 10,
       imports: [
         { from: '@tanstack/react-query', named: ['QueryClientProvider'] },
+        { from: '@tanstack/react-query-devtools', named: ['ReactQueryDevtools'] },
         { from: '@/lib/query-client', named: ['queryClient'] },
       ],
       open: '<QueryClientProvider client={queryClient}>',
       close: '</QueryClientProvider>',
+      trailing: ['<ReactQueryDevtools buttonPosition="bottom-left" />'],
     },
   ],
 };

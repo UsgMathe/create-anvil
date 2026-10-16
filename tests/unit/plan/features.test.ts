@@ -409,3 +409,9 @@ describe('scripts e tsconfig de teste', () => {
     expect(plan.packageJson.devDependencies).toHaveProperty('@vitest/coverage-v8');
   });
 });
+
+describe('base de produção', () => {
+  it('renderiza o devtools do Query, que já é instalado', () => {
+    expect(fileNamed('src/main.tsx', { query: true })).toContain('<ReactQueryDevtools');
+  });
+});
