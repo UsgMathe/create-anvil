@@ -19,6 +19,7 @@ export interface Selection {
   env: boolean;
   api: boolean;
   packageManager: PackageManagerName;
+  packageManagerVersion?: string;
   git: boolean;
   install: boolean;
 }

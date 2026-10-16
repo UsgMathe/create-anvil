@@ -12,16 +12,15 @@ export interface CommandSpec {
 
 const KNOWN: ReadonlySet<string> = new Set(['npm', 'pnpm', 'yarn', 'bun']);
 
+export function isPackageManagerName(value: string): value is PackageManagerName {
+  return KNOWN.has(value);
+}
+
 export function detectPackageManager(
   userAgent: string | undefined,
-  override?: string,
+  override?: PackageManagerName,
 ): DetectedPackageManager {
-  if (override) {
-    if (!KNOWN.has(override)) {
-      throw new Error(`Gerenciador desconhecido: "${override}". Use pnpm, npm, yarn ou bun.`);
-    }
-    return { name: override as PackageManagerName };
-  }
+  if (override) return { name: override };
 
   const firstToken = (userAgent ?? '').trim().split(/\s+/)[0] ?? '';
   const [rawName, rawVersion] = firstToken.split('/');
@@ -33,21 +32,52 @@ export function detectPackageManager(
   return { name: 'npm' };
 }
 
-export function majorVersion(version: string | undefined): number | undefined {
-  const major = Number.parseInt((version ?? '').split('.')[0] ?? '', 10);
-  return Number.isNaN(major) ? undefined : major;
-}
-
 export interface PackageManagerCommands {
   name: PackageManagerName;
   execute(packageSpec: string, args: string[]): CommandSpec;
   install(): CommandSpec;
+  installFrozen: string;
+  exec(bin: string): string;
   runScript(script: string): string;
   runScriptSpec(script: string): CommandSpec;
-  lockfile: string;
 }
 
-export function commandsFor(name: PackageManagerName): PackageManagerCommands {
+export function majorVersion(version: string | undefined): number | undefined {
+  const match = /^(\d+)\.\d+\.\d+/.exec(version ?? '');
+  return match ? Number(match[1]) : undefined;
+}
+
+export function packageManagerField(
+  name: PackageManagerName,
+  version: string | undefined,
+): string | undefined {
+  if (name === 'npm' || majorVersion(version) === undefined) return undefined;
+  return `${name}@${version}`;
+}
+
+function frozenInstall(name: PackageManagerName, version: string | undefined): string {
+  if (name === 'npm') return 'npm ci';
+  if (name === 'yarn') {
+    return (majorVersion(version) ?? 1) >= 2
+      ? 'yarn install --immutable'
+      : 'yarn install --frozen-lockfile';
+  }
+  return `${name} install --frozen-lockfile`;
+}
+
+const EXEC_PREFIX: Record<PackageManagerName, string> = {
+  npm: 'npx',
+  pnpm: 'pnpm exec',
+  yarn: 'yarn',
+  bun: 'bunx',
+};
+
+export function commandsFor(name: PackageManagerName, version?: string): PackageManagerCommands {
+  const runScriptSpec = (script: string): CommandSpec =>
+    name === 'npm' || name === 'bun'
+      ? { command: name, args: ['run', script] }
+      : { command: name, args: [script] };
+
   return {
     name,
     execute(packageSpec, args) {
@@ -59,21 +89,15 @@ export function commandsFor(name: PackageManagerName): PackageManagerCommands {
     install() {
       return { command: name, args: ['install'] };
     },
+    installFrozen: frozenInstall(name, version),
+    exec(bin) {
+      return `${EXEC_PREFIX[name]} ${bin}`;
+    },
     runScript(script) {
-      return name === 'npm' ? `npm run ${script}` : `${name} ${script}`;
+      const { command, args } = runScriptSpec(script);
+      return [command, ...args].join(' ');
     },
-    runScriptSpec(script) {
-      if (name === 'npm' || name === 'bun') return { command: name, args: ['run', script] };
-      return { command: name, args: [script] };
-    },
-    lockfile:
-      name === 'npm'
-        ? 'package-lock.json'
-        : name === 'pnpm'
-          ? 'pnpm-lock.yaml'
-          : name === 'yarn'
-            ? 'yarn.lock'
-            : 'bun.lock',
+    runScriptSpec,
   };
 }
 

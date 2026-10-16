@@ -1,3 +1,4 @@
+import { commandsFor } from '../env/package-manager.js';
 import type { PackageManagerName, Selection } from '../plan/types.js';
 
 export interface ReadmeInput {
@@ -23,9 +24,7 @@ const SCRIPT_DESCRIPTIONS: Record<string, string> = {
 };
 
 function runCommand(packageManager: PackageManagerName, script: string): string {
-  return packageManager === 'npm' || packageManager === 'bun'
-    ? `${packageManager} run ${script}`
-    : `${packageManager} ${script}`;
+  return commandsFor(packageManager).runScript(script);
 }
 
 function stackList(selection: Selection): string[] {

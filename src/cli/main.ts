@@ -39,8 +39,12 @@ async function runPipeline(argv: string[], env: NodeJS.ProcessEnv, io: Io): Prom
   const resolved = await resolveSelection({ args, interactive, prompter: clackPrompter });
 
   const detected = detectPackageManager(env.npm_config_user_agent, args.pm);
-  const selection = { ...resolved, packageManager: detected.name };
-  const pm = commandsFor(detected.name);
+  const selection = {
+    ...resolved,
+    packageManager: detected.name,
+    packageManagerVersion: detected.version,
+  };
+  const pm = commandsFor(detected.name, detected.version);
   log.info(`Gerenciador: ${pm.name}`);
 
   const root = resolve(process.cwd(), selection.directoryName);

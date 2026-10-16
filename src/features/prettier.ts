@@ -22,7 +22,15 @@ function prettierrc(context: FeatureContext): string {
 }
 
 function prettierignore(context: FeatureContext): string {
-  const lines = ['dist', 'coverage', 'node_modules', 'package-lock.json', 'pnpm-lock.yaml'];
+  const lines = [
+    'dist',
+    'coverage',
+    'node_modules',
+    'package-lock.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lock',
+  ];
   if (context.selection.router === 'tanstack') lines.push('src/routeTree.gen.ts');
   return `${lines.join('\n')}\n`;
 }

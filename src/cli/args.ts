@@ -1,6 +1,8 @@
 import { parseArgs } from 'node:util';
 
+import { isPackageManagerName } from '../env/package-manager.js';
 import { CliError } from '../errors.js';
+import type { PackageManagerName } from '../plan/types.js';
 
 export const BOOLEAN_FLAGS = [
   'tailwind',
@@ -30,7 +32,7 @@ export interface RawArgs {
   router?: string;
   linter?: string;
   preset?: string;
-  pm?: string;
+  pm?: PackageManagerName;
   booleans: Partial<Record<BooleanFlag, boolean>>;
 }
 
@@ -92,6 +94,13 @@ export function parseCliArgs(argv: string[]): RawArgs {
     else if (negative === true) booleans[flag] = false;
   }
 
+  const pm = values.pm as string | undefined;
+  if (pm !== undefined && !isPackageManagerName(pm)) {
+    throw new CliError(`Gerenciador desconhecido: "${pm}". Use pnpm, npm, yarn ou bun.`, {
+      exitCode: 2,
+    });
+  }
+
   return {
     projectName: parsed.positionals[0],
     help: values.help === true,
@@ -102,7 +111,7 @@ export function parseCliArgs(argv: string[]): RawArgs {
     router: values.router as string | undefined,
     linter: values.linter as string | undefined,
     preset: values.preset as string | undefined,
-    pm: values.pm as string | undefined,
+    pm,
     booleans,
   };
 }

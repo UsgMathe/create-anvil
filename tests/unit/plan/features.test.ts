@@ -87,22 +87,74 @@ describe('features opcionais', () => {
     expect(plannedPaths({ husky: true })).toContain('.husky/pre-commit');
   });
 
-  it('o CI gerado só cita scripts que existem', () => {
-    const selection = { githubActions: true, vitest: false, linter: 'oxlint' } as const;
-    const plan = buildPlan(selectionOf(selection), base);
-    const workflow = fileNamed('.github/workflows/ci.yml', selection);
-    const scripts = Object.keys(plan.packageJson.scripts ?? {});
+  it.each(['npm', 'pnpm', 'yarn', 'bun'] as const)(
+    'o CI gerado com %s só roda scripts que existem, pelo próprio gerenciador',
+    (packageManager) => {
+      for (const vitest of [true, false]) {
+        const selection = { githubActions: true, vitest, packageManager } as const;
+        const plan = buildPlan(selectionOf(selection), base);
+        const workflow = fileNamed('.github/workflows/ci.yml', selection);
+        const scripts = Object.keys(plan.packageJson.scripts ?? {});
+        const runPrefix = packageManager === 'npm' || packageManager === 'bun' ? ' run' : '';
+        const pattern = new RegExp(`- run: ${packageManager}${runPrefix} ([a-z:]+)$`, 'gm');
+        const ran = [...workflow.matchAll(pattern)].map((match) => match[1]);
 
-    for (const match of workflow.matchAll(/npm run ([a-z:]+)/g)) {
-      expect(scripts).toContain(match[1]);
-    }
-    expect(workflow).not.toContain('npm test');
+        expect(ran.length).toBeGreaterThan(0);
+        for (const script of ran) expect(scripts).toContain(script);
+        expect(ran.includes('test')).toBe(vitest);
+        expect(ran).toContain('format:check');
+      }
+    },
+  );
+
+  it('o CI instala com o lockfile congelado do gerenciador escolhido', () => {
+    const workflowFor = (overrides: Parameters<typeof selectionOf>[0]) =>
+      fileNamed('.github/workflows/ci.yml', { githubActions: true, ...overrides });
+
+    expect(workflowFor({ packageManager: 'npm' })).toContain('- run: npm ci');
+    expect(workflowFor({ packageManager: 'npm' })).toContain('cache: npm');
+
+    const pnpm = workflowFor({ packageManager: 'pnpm' });
+    expect(pnpm).toContain('pnpm/action-setup');
+    expect(pnpm).toContain('cache: pnpm');
+    expect(pnpm).toContain('- run: pnpm install --frozen-lockfile');
+    expect(pnpm).not.toContain('npm ci');
+
+    expect(workflowFor({ packageManager: 'yarn', packageManagerVersion: '4.5.0' })).toContain(
+      '- run: yarn install --immutable',
+    );
+    expect(workflowFor({ packageManager: 'bun' })).toContain('oven-sh/setup-bun');
   });
 
-  it('o CI gerado inclui o passo de teste quando há vitest', () => {
-    expect(fileNamed('.github/workflows/ci.yml', { githubActions: true, vitest: true })).toContain(
-      'npm test',
+  it('com a versão do pnpm conhecida, ela vai para o package.json e o CI a lê de lá', () => {
+    const selection = {
+      githubActions: true,
+      packageManager: 'pnpm',
+      packageManagerVersion: '10.32.1',
+    } as const;
+    const plan = buildPlan(selectionOf(selection), base);
+    expect(plan.packageJson.packageManager).toBe('pnpm@10.32.1');
+    expect(fileNamed('.github/workflows/ci.yml', selection)).not.toMatch(/^\s+version:/m);
+
+    const unknown = { githubActions: true, packageManager: 'pnpm' } as const;
+    expect(buildPlan(selectionOf(unknown), base).packageJson.packageManager).toBeUndefined();
+    expect(fileNamed('.github/workflows/ci.yml', unknown)).toContain('version: 10');
+  });
+
+  it('o pre-commit chama o lint-staged pelo gerenciador escolhido', () => {
+    expect(fileNamed('.husky/pre-commit', { husky: true, packageManager: 'npm' })).toBe(
+      'npx lint-staged\n',
     );
+    expect(fileNamed('.husky/pre-commit', { husky: true, packageManager: 'pnpm' })).toBe(
+      'pnpm exec lint-staged\n',
+    );
+  });
+
+  it('o .prettierignore cobre o lockfile de todo gerenciador', () => {
+    const ignore = fileNamed('.prettierignore', {});
+    for (const lockfile of ['package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock']) {
+      expect(ignore).toContain(lockfile);
+    }
   });
 });
 

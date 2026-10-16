@@ -47,6 +47,12 @@ describe('presets', () => {
     await expect(resolve(['app', '--preset=turbo'])).rejects.toMatchObject({ exitCode: 2 });
   });
 
+  it('recusa gerenciador desconhecido com código 2, antes de qualquer prompt', () => {
+    expect(() => parseCliArgs(['app', '--pm=deno'])).toThrow(
+      expect.objectContaining({ exitCode: 2 }),
+    );
+  });
+
   it('recusa --api sem --env, porque o cliente lê o schema validado', async () => {
     await expect(resolve(['app', '--api', '--no-env'])).rejects.toMatchObject({ exitCode: 2 });
   });

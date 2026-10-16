@@ -3,6 +3,7 @@ import type { PackageJson } from '../plan/types.js';
 export interface PackageJsonInput {
   base: PackageJson;
   name: string;
+  packageManager?: string;
   scripts: Record<string, string>;
   removeScripts: string[];
   removeDependencies: string[];
@@ -39,6 +40,7 @@ export function composePackageJson(input: PackageJsonInput): PackageJson {
 
   result.dependencies = dependencies;
   result.devDependencies = devDependencies;
+  if (input.packageManager) result.packageManager = input.packageManager;
 
   return result;
 }

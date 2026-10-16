@@ -158,6 +158,11 @@ combinações em milissegundos.
 - **A feature `api` exige a `env`**, porque `src/lib/http.ts` importa `@/config/env`. O `baseURL` é
   `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
   sessão preservado), em produção vai direto.
+- **Comandos por gerenciador saem só de `commandsFor()`** (`src/env/package-manager.ts`): README,
+  CI e husky usam `runScript`, `exec` e `installFrozen`. O bun é sempre `bun run <script>`:
+  `bun test` e `bun build` são comandos nativos e ignorariam o script. O campo `packageManager`
+  do `package.json` só é escrito quando a versão veio do user-agent; o `pnpm/action-setup` a lê
+  dali, e sem ela o CI fixa o major.
 - **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json`
   próprio, e **o `tsconfig.json` da raiz precisa referenciá-lo, por último**. O editor só acha
   projeto para um arquivo pelas `references` da raiz; sem ela, o teste cai num projeto inferido,

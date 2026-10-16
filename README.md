@@ -101,7 +101,7 @@ marque o que quer e copie a linha pronta, já na sintaxe do seu gerenciador.
 | `--zustand` / `--no-zustand`              | Zustand.                                                                                      |
 | `--forms` / `--no-forms`                  | react-hook-form + zod, com um formulário de exemplo — em shadcn/ui, se ele estiver ligado.    |
 | `--husky` / `--no-husky`                  | husky + lint-staged.                                                                          |
-| `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado.                                                             |
+| `--gh-actions` / `--no-gh-actions`        | Workflow de CI no projeto gerado, com o gerenciador escolhido.                                |
 | `--env` / `--no-env`                      | Valida as variáveis de ambiente com zod: `sample.env`, `.env` e `src/config/env.ts`.          |
 | `--api` / `--no-api`                      | Cliente HTTP (axios) e proxy de `/api` para `VITE_API_URL` no desenvolvimento. Exige `--env`. |
 | `--git` / `--no-git`                      | `git init` + commit inicial.                                                                  |

@@ -1,3 +1,4 @@
+import { commandsFor } from '../env/package-manager.js';
 import type { Feature, FeatureContext } from '../plan/types.js';
 import { entries } from './versions.js';
 
@@ -31,7 +32,10 @@ export const husky: Feature = {
   devDependencies: () => entries(['husky', 'lint-staged']),
   files: (context) => [
     { path: '.lintstagedrc.json', contents: lintStagedConfig(context) },
-    { path: '.husky/pre-commit', contents: `npx lint-staged${'\n'}` },
+    {
+      path: '.husky/pre-commit',
+      contents: `${commandsFor(context.selection.packageManager).exec('lint-staged')}\n`,
+    },
   ],
   scripts: () => ({ prepare: 'husky' }),
 };

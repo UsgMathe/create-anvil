@@ -4,6 +4,7 @@ import {
   commandsFor,
   createViteCommand,
   detectPackageManager,
+  packageManagerField,
 } from '../../../src/env/package-manager.js';
 
 describe('detectPackageManager', () => {
@@ -27,9 +28,17 @@ describe('detectPackageManager', () => {
     expect(detectPackageManager('').name).toBe('npm');
   });
 
-  it('respeita o override explícito e rejeita desconhecidos', () => {
+  it('respeita o override explícito', () => {
     expect(detectPackageManager('npm/11', 'pnpm').name).toBe('pnpm');
-    expect(() => detectPackageManager('npm/11', 'deno')).toThrow(/desconhecido/);
+  });
+});
+
+describe('packageManagerField', () => {
+  it('só fixa o gerenciador quando a versão é conhecida e não é npm', () => {
+    expect(packageManagerField('pnpm', '10.32.1')).toBe('pnpm@10.32.1');
+    expect(packageManagerField('pnpm', undefined)).toBeUndefined();
+    expect(packageManagerField('pnpm', '?')).toBeUndefined();
+    expect(packageManagerField('npm', '11.0.0')).toBeUndefined();
   });
 });
 
@@ -42,5 +51,29 @@ describe('createViteCommand', () => {
       expect(args).toContain('react-ts');
       expect(args).not.toContain('--no-rolldown');
     }
+  });
+});
+
+describe('commandsFor', () => {
+  it.each([
+    ['npm', 'npm run dev', 'npm ci', 'npx lint-staged'],
+    ['pnpm', 'pnpm dev', 'pnpm install --frozen-lockfile', 'pnpm exec lint-staged'],
+    ['yarn', 'yarn dev', 'yarn install --frozen-lockfile', 'yarn lint-staged'],
+    ['bun', 'bun run dev', 'bun install --frozen-lockfile', 'bunx lint-staged'],
+  ] as const)('monta os comandos do %s', (name, run, frozen, exec) => {
+    const pm = commandsFor(name);
+    expect(pm.runScript('dev')).toBe(run);
+    expect(pm.installFrozen).toBe(frozen);
+    expect(pm.exec('lint-staged')).toBe(exec);
+  });
+
+  it('usa a flag do Yarn Berry só quando a versão confirma o major 2+', () => {
+    expect(commandsFor('yarn', '4.5.0').installFrozen).toBe('yarn install --immutable');
+    expect(commandsFor('yarn', '1.22.22').installFrozen).toBe('yarn install --frozen-lockfile');
+  });
+
+  it('nunca chama o bun sem "run", que trocaria o script pelo comando nativo', () => {
+    expect(commandsFor('bun').runScript('test')).toBe('bun run test');
+    expect(commandsFor('bun').runScript('build')).toBe('bun run build');
   });
 });

@@ -4,6 +4,7 @@ import { composePackageJson, renderPackageJson } from '../compose/package-json.j
 import { composeReadme } from '../compose/readme.js';
 import { addExcludes, addExplicitStrict, addPathAlias, addReference } from '../compose/tsconfig.js';
 import { composeViteConfig } from '../compose/vite-config.js';
+import { packageManagerField } from '../env/package-manager.js';
 import { FEATURES } from '../features/registry.js';
 import { TEST_FILE_GLOBS, VITEST_TSCONFIG } from '../features/testing.js';
 import { CliError } from '../errors.js';
@@ -172,6 +173,7 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
   const packageJson = composePackageJson({
     base: basePackageJson,
     name: selection.packageName,
+    packageManager: packageManagerField(selection.packageManager, selection.packageManagerVersion),
     scripts,
     removeScripts,
     removeDependencies,
