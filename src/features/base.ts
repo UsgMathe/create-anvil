@@ -9,10 +9,31 @@ export const REMOVED_BY_BASE = [
   'src/assets/vite.svg',
 ];
 
+const GITATTRIBUTES = `* text=auto eol=lf
+`;
+
+const EDITORCONFIG = `root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+`;
+
 export const base: Feature = {
   id: 'base',
   enabled: () => true,
   removeFiles: () => REMOVED_BY_BASE,
+  files: () => [
+    { path: '.gitattributes', contents: GITATTRIBUTES },
+    { path: '.editorconfig', contents: EDITORCONFIG },
+  ],
   scripts: () => ({ dev: 'vite --host', preview: 'vite preview --host', typecheck: 'tsc -b' }),
   vitePlugins: () => [
     {

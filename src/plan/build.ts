@@ -161,7 +161,7 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
     files.push({
       path: 'index.html',
       contents: replaceOrThrow(
-        indexHtml,
+        replaceOrThrow(indexHtml, /<html lang="[^"]*">/, '<html lang="pt-BR">'),
         /<title>[\s\S]*?<\/title>/,
         `<title>${selection.packageName}</title>`,
       ),

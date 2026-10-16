@@ -158,6 +158,17 @@ describe('features opcionais', () => {
   });
 });
 
+describe('arquivos de base', () => {
+  it('fixa LF no git e no editor, como o Prettier exige', () => {
+    expect(fileNamed('.gitattributes', {})).toContain('eol=lf');
+    expect(fileNamed('.editorconfig', {})).toContain('end_of_line = lf');
+  });
+
+  it('declara o index.html em pt-BR, a língua da interface gerada', () => {
+    expect(fileNamed('index.html', {})).toContain('<html lang="pt-BR">');
+  });
+});
+
 describe('formulário de exemplo com shadcn', () => {
   const UI_COMPONENTS = ['button', 'input', 'label', 'separator', 'field'].map(
     (name) => `src/components/ui/${name}.tsx`,

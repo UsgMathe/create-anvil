@@ -2,6 +2,8 @@
 
 exports[`snapshots de composição > biome > árvore de arquivos 1`] = `
 [
+  ".editorconfig",
+  ".gitattributes",
   ".gitignore",
   "README.md",
   "biome.json",
@@ -18,6 +20,8 @@ exports[`snapshots de composição > biome > árvore de arquivos 1`] = `
 
 exports[`snapshots de composição > minimal > árvore de arquivos 1`] = `
 [
+  ".editorconfig",
+  ".gitattributes",
   ".gitignore",
   ".oxlintrc.json",
   ".prettierignore",
@@ -36,6 +40,8 @@ exports[`snapshots de composição > minimal > árvore de arquivos 1`] = `
 
 exports[`snapshots de composição > react-router-query > árvore de arquivos 1`] = `
 [
+  ".editorconfig",
+  ".gitattributes",
   ".gitignore",
   ".oxlintrc.json",
   ".prettierignore",
@@ -62,6 +68,8 @@ exports[`snapshots de composição > react-router-query > árvore de arquivos 1`
 
 exports[`snapshots de composição > tanstack-query > árvore de arquivos 1`] = `
 [
+  ".editorconfig",
+  ".gitattributes",
   ".gitignore",
   ".prettierignore",
   ".prettierrc.json",
