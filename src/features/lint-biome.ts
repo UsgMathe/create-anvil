@@ -16,7 +16,16 @@ function biomeJson(context: FeatureContext): string {
   const config = {
     $schema: 'https://biomejs.dev/schemas/2.5.14/schema.json',
     vcs: { enabled: true, clientKind: 'git', useIgnoreFile: true },
-    files: { ignoreUnknown: false, includes: ['**', '!dist', '!coverage', '!public'] },
+    files: {
+      ignoreUnknown: false,
+      includes: [
+        '**',
+        '!dist',
+        '!coverage',
+        '!public',
+        ...(context.selection.router === 'tanstack' ? ['!src/routeTree.gen.ts'] : []),
+      ],
+    },
     formatter: { enabled: true, indentStyle: 'space', indentWidth: 2, lineWidth: 100 },
     assist: { actions: { source: { organizeImports: 'on' } } },
     linter: { enabled: true, rules: { recommended: true } },

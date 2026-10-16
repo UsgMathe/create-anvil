@@ -493,3 +493,13 @@ describe('base de produção', () => {
     expect(fileNamed('src/config/env.ts', { env: true, api: true })).toContain('VITE_API_URL');
   });
 });
+
+describe('arquivo gerado pelo plugin do TanStack', () => {
+  it('fica fora de todo formatador, porque nasce no build e não passa pelo format', () => {
+    const biome = JSON.parse(fileNamed('biome.json', { router: 'tanstack', linter: 'biome' })) as {
+      files: { includes: string[] };
+    };
+    expect(biome.files.includes).toContain('!src/routeTree.gen.ts');
+    expect(fileNamed('.prettierignore', { router: 'tanstack' })).toContain('src/routeTree.gen.ts');
+  });
+});
