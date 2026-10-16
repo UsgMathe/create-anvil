@@ -74,8 +74,15 @@ function conventions(selection: Selection): string[] {
 
   if (selection.env) {
     items.push(
-      'Toda variável `VITE_*` nova precisa entrar no schema de `src/config/env.ts`, senão a' +
-        ' aplicação lança na inicialização. Copie `sample.env` para `.env` ao clonar o projeto.',
+      'Toda variável `VITE_*` nova entra no schema de `src/config/env.schema.ts` e no' +
+        ' `sample.env`. O mesmo schema é validado pelo `vite.config.ts`, então `dev` e `build`' +
+        ' falham logo, com a variável que falta, em vez de gerar um bundle que quebra no' +
+        ' navegador. Copie `sample.env` para `.env` ao clonar o projeto; no deploy, defina as' +
+        ' variáveis de verdade no ambiente de build.' +
+        (selection.vitest
+          ? ' Nos testes a validação do config é pulada e os valores vêm do `test.env` do' +
+            ' `vite.config.ts`, para os testes rodarem sem `.env`.'
+          : ''),
     );
   }
 

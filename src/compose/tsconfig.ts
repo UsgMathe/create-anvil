@@ -21,6 +21,10 @@ export function addReference(source: string, path: string): string {
   return editJsonc(source, [{ path: ['references', -1], value: { path }, insert: true }]);
 }
 
+export function addInclude(source: string, path: string): string {
+  return editJsonc(source, [{ path: ['include', -1], value: path, insert: true }]);
+}
+
 export function addPathAlias(source: string): string {
   return editJsonc(source, [{ path: ['compilerOptions', 'paths', '@/*'], value: ['./src/*'] }]);
 }

@@ -5,6 +5,7 @@ export interface ViteConfigInput {
   plugins: VitePluginContribution[];
   testBlock?: string;
   serverBlock?: string;
+  envSchemaPath?: string;
 }
 
 function indent(block: string): string {
@@ -16,12 +17,13 @@ function indent(block: string): string {
 
 export function composeViteConfig(input: ViteConfigInput): string {
   const plugins = [...input.plugins].sort((a, b) => a.order - b.order);
-  const usesEnv = Boolean(input.serverBlock);
+  const usesEnv = Boolean(input.serverBlock) || Boolean(input.envSchemaPath);
 
   const imports: ImportSpec[] = [
     { from: 'node:url', named: ['fileURLToPath'] },
     { from: 'vite', named: usesEnv ? ['defineConfig', 'loadEnv'] : ['defineConfig'] },
     ...plugins.flatMap((plugin) => plugin.imports),
+    ...(input.envSchemaPath ? [{ from: `./${input.envSchemaPath}`, named: ['parseEnv'] }] : []),
   ];
 
   const pluginList = plugins.map((plugin) => `    ${plugin.expression},`).join('\n');
@@ -46,10 +48,18 @@ ${body}
 `;
   }
 
+  const loadsEnv = "loadEnv(mode, process.cwd(), 'VITE_')";
+  const envSetup = input.serverBlock
+    ? [
+        `  const env = ${loadsEnv};`,
+        ...(input.envSchemaPath ? ["  if (mode !== 'test') parseEnv(env);"] : []),
+      ]
+    : [`  if (mode !== 'test') parseEnv(${loadsEnv});`];
+
   return `${header}${renderImports(imports)}
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+${envSetup.join('\n')}
 
   return {
 ${indent(body)}

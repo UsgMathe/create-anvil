@@ -1,6 +1,6 @@
 import { execa } from 'execa';
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -82,6 +82,21 @@ describe('scaffold de verdade', () => {
       }
     },
   );
+
+  it('o build falha sem .env, apontando a variável, e passa com ele', async () => {
+    const root = await scaffold(['--router=none', '--env', '--api']);
+    const envFile = join(root, '.env');
+    const contents = await readFile(envFile, 'utf8');
+
+    await rm(envFile);
+    const missing = await runScript('npm', 'build', root);
+    expect(missing.exitCode).not.toBe(0);
+    expect(`${missing.stdout}\n${missing.stderr}`).toContain('VITE_API_URL');
+
+    await writeFile(envFile, contents);
+    const present = await runScript('npm', 'build', root);
+    expect(present.exitCode, `${present.stdout}\n${present.stderr}`).toBe(0);
+  });
 
   it('remove a pasta quando o scaffold falha no meio', async () => {
     const workspace = await mkdtemp(join(tmpdir(), 'anvil-e2e-'));

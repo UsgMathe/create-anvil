@@ -160,18 +160,26 @@ combinações em milissegundos.
   `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
   sessão preservado), em produção vai direto. Um interceptor transforma todo erro em `ApiError`. O
   `sample.env` aponta para o jsonplaceholder, para a página de exemplos mostrar dados reais no
-  primeiro `dev`; sem `api`, o schema traz `VITE_APP_NAME` no lugar da `VITE_API_URL`.
+  primeiro `dev`; sem `api`, o `posts.api.ts` é um fake em memória (nunca `fetch` relativo: o
+  Vite devolve o `index.html` e o `.json()` lança).
 - **Os exemplos ficam numa página só**, montada por `src/compose/example-page.ts` com uma seção por
   feature (`query`, `forms`, `zustand`) e escrita pela feature `examples`. `hasExamples()` em
   `src/features/examples.ts` é a fonte única: os roteadores e o `app` a consultam para criar a rota,
   os links e o `<ExamplesPage />`. Código de exemplo que nenhuma tela usa é o que o usuário apaga
-  no primeiro dia — toda demo nova entra como seção dessa página. Sem `api`, o `posts.api.ts` é
-  um fake em memória (nunca `fetch` relativo: o Vite devolve o `index.html` e o `.json()` lança).
+  no primeiro dia — toda demo nova entra como seção dessa página.
 - **Comandos por gerenciador saem só de `commandsFor()`** (`src/env/package-manager.ts`): README,
   CI e husky usam `runScript`, `exec` e `installFrozen`. O bun é sempre `bun run <script>`:
   `bun test` e `bun build` são comandos nativos e ignorariam o script. O campo `packageManager`
   do `package.json` só é escrito quando a versão veio do user-agent; o `pnpm/action-setup` a lê
   dali, e sem ela o CI fixa o major.
+- **O env é validado no `vite.config.ts`, não só em runtime.** O schema mora em
+  `src/config/env.schema.ts` (com `parseEnv`), importado pelo app (`src/config/env.ts`) e pelo
+  config. Sem isso, um build sem `.env` passava e o bundle quebrava no navegador. Três detalhes:
+  - o config importa `./src/config/env.schema.ts` **com extensão**, porque o `tsconfig.node.json`
+    usa `module: nodenext`, e o arquivo entra no `include` dele, senão o `tsc -b` não o checa;
+  - a validação pula `mode === 'test'`: o vitest carrega o config sem `.env` no CI, e os valores
+    dos testes vêm do `test.env` do bloco `test`;
+  - o CI gerado roda `cp sample.env .env` antes do build, já que o `.env` é desversionado.
 - **Classes de cor saem de `uiClasses()`** (`src/features/ui-classes.ts`): com shadcn são os tokens
   (`text-muted-foreground`), que acompanham o tema escuro; sem ele, `neutral` fixo.
 - **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json`

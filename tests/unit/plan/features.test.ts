@@ -1,3 +1,4 @@
+import { parse } from 'jsonc-parser';
 import { describe, expect, it } from 'vitest';
 
 import { buildPlan } from '../../../src/plan/build.js';
@@ -284,7 +285,7 @@ describe('validação de env', () => {
   });
 
   it('o sample.env cobre exatamente as chaves do schema', () => {
-    const schema = fileNamed('src/config/env.ts', { env: true });
+    const schema = fileNamed('src/config/env.schema.ts', { env: true });
     const sample = fileNamed('sample.env', { env: true });
 
     const schemaKeys = [...schema.matchAll(/^\s+(VITE_[A-Z0-9_]+):/gm)].map((m) => m[1]);
@@ -489,8 +490,10 @@ describe('base de produção', () => {
   });
 
   it('o env sem api não exige VITE_API_URL', () => {
-    expect(fileNamed('src/config/env.ts', { env: true })).not.toContain('VITE_API_URL');
-    expect(fileNamed('src/config/env.ts', { env: true, api: true })).toContain('VITE_API_URL');
+    expect(fileNamed('src/config/env.schema.ts', { env: true })).not.toContain('VITE_API_URL');
+    expect(fileNamed('src/config/env.schema.ts', { env: true, api: true })).toContain(
+      'VITE_API_URL',
+    );
   });
 });
 
@@ -540,5 +543,45 @@ describe('MSW', () => {
       api: true,
     });
     expect(setup).toContain("server.listen({ onUnhandledFrame: 'error' })");
+  });
+});
+
+describe('validação de env no build', () => {
+  it('o vite.config valida com o mesmo schema do app, fora do modo de teste', () => {
+    const config = fileNamed('vite.config.ts', { env: true });
+    expect(config).toContain("import { parseEnv } from './src/config/env.schema.ts';");
+    expect(config).toContain(
+      "if (mode !== 'test') parseEnv(loadEnv(mode, process.cwd(), 'VITE_'));",
+    );
+    expect(fileNamed('src/config/env.ts', { env: true })).toContain(
+      "import { parseEnv } from '@/config/env.schema';",
+    );
+  });
+
+  it('com proxy, valida o mesmo env que alimenta o alvo do proxy', () => {
+    const config = fileNamed('vite.config.ts', { env: true, api: true });
+    expect(config).toContain("const env = loadEnv(mode, process.cwd(), 'VITE_');");
+    expect(config).toContain("if (mode !== 'test') parseEnv(env);");
+  });
+
+  it('põe o schema no tsconfig.node.json, senão o tsc -b não checa o import do config', () => {
+    const tsconfig = parse(fileNamed('tsconfig.node.json', { env: true })) as { include: string[] };
+    expect(tsconfig.include).toEqual(['vite.config.ts', 'src/config/env.schema.ts']);
+    expect(plannedPaths({ env: false })).not.toContain('tsconfig.node.json');
+  });
+
+  it('sem env, o vite.config continua na forma de objeto', () => {
+    expect(fileNamed('vite.config.ts', {})).toContain('export default defineConfig({');
+  });
+});
+
+describe('CI com env validado no build', () => {
+  it('copia o sample.env antes do build, porque o .env não é versionado', () => {
+    const workflow = fileNamed('.github/workflows/ci.yml', { githubActions: true, env: true });
+    expect(workflow.indexOf('cp sample.env .env')).toBeGreaterThan(-1);
+    expect(workflow.indexOf('cp sample.env .env')).toBeLessThan(workflow.indexOf('run build'));
+    expect(fileNamed('.github/workflows/ci.yml', { githubActions: true })).not.toContain(
+      'sample.env',
+    );
   });
 });

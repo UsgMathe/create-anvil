@@ -2,9 +2,16 @@ import { composeIndexCss } from '../compose/index-css.js';
 import { composeMainTsx } from '../compose/main-tsx.js';
 import { composePackageJson, renderPackageJson } from '../compose/package-json.js';
 import { composeReadme } from '../compose/readme.js';
-import { addExcludes, addExplicitStrict, addPathAlias, addReference } from '../compose/tsconfig.js';
+import {
+  addExcludes,
+  addExplicitStrict,
+  addInclude,
+  addPathAlias,
+  addReference,
+} from '../compose/tsconfig.js';
 import { composeViteConfig } from '../compose/vite-config.js';
 import { packageManagerField } from '../env/package-manager.js';
+import { ENV_SCHEMA_PATH } from '../features/env.js';
 import { FEATURES } from '../features/registry.js';
 import { TEST_FILE_GLOBS, VITEST_TSCONFIG } from '../features/testing.js';
 import { CliError } from '../errors.js';
@@ -135,7 +142,12 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
   });
   files.push({
     path: 'vite.config.ts',
-    contents: composeViteConfig({ plugins: vitePlugins, testBlock, serverBlock }),
+    contents: composeViteConfig({
+      plugins: vitePlugins,
+      testBlock,
+      serverBlock,
+      envSchemaPath: selection.env ? ENV_SCHEMA_PATH : undefined,
+    }),
   });
 
   if (cssBlocks.length > 0) {
@@ -154,6 +166,11 @@ export function buildPlan(selection: Selection, base: BaseTree): Plan {
       if (selection.vitest) contents = addExcludes(contents, TEST_FILE_GLOBS);
     }
     files.push({ path: tsconfigPath, contents });
+  }
+
+  const nodeTsconfig = base['tsconfig.node.json'];
+  if (selection.env && nodeTsconfig !== undefined) {
+    files.push({ path: 'tsconfig.node.json', contents: addInclude(nodeTsconfig, ENV_SCHEMA_PATH) });
   }
 
   const indexHtml = base['index.html'];

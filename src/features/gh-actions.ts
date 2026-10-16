@@ -40,6 +40,7 @@ function checkSteps(selection: Selection): string[] {
 
   return [
     `      - run: ${pm.installFrozen}`,
+    ...(selection.env ? ['      - run: cp sample.env .env'] : []),
     ...scripts.map((script) => `      - run: ${pm.runScript(script)}`),
   ];
 }
