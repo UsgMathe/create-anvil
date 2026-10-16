@@ -114,7 +114,7 @@
       "key": "shadcn",
       "flag": "shadcn",
       "label": "shadcn/ui",
-      "hint": "components.json e src/lib/utils.ts prontos, sem rodar o init.",
+      "hint": "components.json e src/lib/utils.ts prontos, sem rodar o init, com tema claro/escuro.",
       "group": "ui",
       "presetAware": true,
       "default": false,
@@ -155,7 +155,7 @@
       "key": "env",
       "flag": "env",
       "label": "Validação de variáveis de ambiente com zod",
-      "hint": "sample.env, .env e um src/config/env.ts que falha cedo.",
+      "hint": "sample.env, .env e um schema checado no dev, no build e no app.",
       "group": "env",
       "presetAware": true,
       "default": false
@@ -176,7 +176,7 @@
       "key": "vitest",
       "flag": "vitest",
       "label": "Vitest + Testing Library",
-      "hint": "Testes ao lado do código, com cobertura e typecheck próprio.",
+      "hint": "Testes do próprio app ao lado do código, com MSW quando há API.",
       "group": "quality",
       "presetAware": true,
       "default": false
@@ -196,7 +196,7 @@
       "key": "githubActions",
       "flag": "gh-actions",
       "label": "Workflow de CI no projeto gerado",
-      "hint": "Roda lint, typecheck, testes e build a cada push.",
+      "hint": "Lint, formatação, build e testes a cada push, com o seu gerenciador.",
       "group": "quality",
       "presetAware": true,
       "default": false

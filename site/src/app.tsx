@@ -229,7 +229,9 @@ export function App() {
                 </p>
                 <p className="mt-5 leading-relaxed text-muted-foreground">
                   O projeto gerado sai com um README escrito a partir das suas escolhas, descrevendo
-                  a stack real e os comandos que existem de fato.
+                  a stack real e os comandos que existem de fato. Com Query, formulários ou Zustand,
+                  ele também traz uma página de exemplos ligada ao roteador, que usa as peças juntas
+                  — é só apagá-la quando não servir mais.
                 </p>
                 <div className="mt-8">
                   <Button asChild>
