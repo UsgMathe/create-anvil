@@ -494,6 +494,33 @@ describe('base de produção', () => {
   });
 });
 
+describe('testes do projeto gerado', () => {
+  it('testa o próprio app em vez de um <p>ok</p>', () => {
+    const paths = plannedPaths({ vitest: true, forms: true, query: true });
+    expect(paths).toContain('src/app.test.tsx');
+    expect(paths).toContain('src/components/contact-form.test.tsx');
+    expect(paths).toContain('src/api/posts/posts.queries.test.ts');
+    expect(paths).not.toContain('src/test/smoke.test.tsx');
+  });
+
+  it('só traz o MSW quando há API de verdade para interceptar', () => {
+    const withApi = buildPlan(
+      selectionOf({ vitest: true, query: true, env: true, api: true }),
+      base,
+    );
+    expect(withApi.packageJson.devDependencies).toHaveProperty('msw');
+    expect(withApi.files.map((file) => file.path)).toContain('src/test/server.ts');
+
+    const withoutApi = buildPlan(selectionOf({ vitest: true, query: true }), base);
+    expect(withoutApi.packageJson.devDependencies).not.toHaveProperty('msw');
+  });
+
+  it('define as variáveis do schema no ambiente de teste, onde o .env não existe no CI', () => {
+    const config = fileNamed('vite.config.ts', { vitest: true, env: true, api: true });
+    expect(config).toContain("env: { VITE_API_URL: 'http://localhost:3000' }");
+  });
+});
+
 describe('arquivo gerado pelo plugin do TanStack', () => {
   it('fica fora de todo formatador, porque nasce no build e não passa pelo format', () => {
     const biome = JSON.parse(fileNamed('biome.json', { router: 'tanstack', linter: 'biome' })) as {
@@ -501,5 +528,17 @@ describe('arquivo gerado pelo plugin do TanStack', () => {
     };
     expect(biome.files.includes).toContain('!src/routeTree.gen.ts');
     expect(fileNamed('.prettierignore', { router: 'tanstack' })).toContain('src/routeTree.gen.ts');
+  });
+});
+
+describe('MSW', () => {
+  it('usa a opção do MSW 3 para falhar em requisição sem handler', () => {
+    const setup = fileNamed('src/test/setup.ts', {
+      vitest: true,
+      query: true,
+      env: true,
+      api: true,
+    });
+    expect(setup).toContain("server.listen({ onUnhandledFrame: 'error' })");
   });
 });

@@ -32,6 +32,7 @@ export const VERSIONS = {
   globals: '^17',
   husky: '^9',
   jsdom: '^30',
+  msw: '^3',
   'lint-staged': '^17',
   prettier: '^3',
   tailwindcss: '^4',

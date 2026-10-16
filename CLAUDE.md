@@ -198,7 +198,8 @@ Três projetos do vitest, definidos em `vitest.config.ts`:
   `assertManifestCoherent` e confere que todo import `@/` aponta para um arquivo do plano e todo
   pacote importado está declarado — é ele que pega template novo importando o que não existe. Sem I/O.
 - **`gen`** — `main()` com um `Io` falso: rollback, ordem do pipeline, códigos de saída.
-- **`e2e`** — gera projetos de verdade e roda `build`/`lint`/`test` neles, com **npm e pnpm** (o
+- **`e2e`** — gera projetos de verdade e roda `build`/`lint`/`format:check`/`test` neles, com
+  **npm e pnpm** (o
   pnpm é o ambiente do mantenedor, e o job de e2e no CI instala o `pnpm/action-setup` por isso).
   **Exige `npm run build`
   antes**, porque invoca `dist/index.js`; o teste falha com uma mensagem clara se o bundle não

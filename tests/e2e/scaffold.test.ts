@@ -15,17 +15,28 @@ const COMBINATIONS: { name: string; pm: PackageManager; flags: string[] }[] = [
   {
     name: 'tanstack',
     pm: 'npm',
-    flags: ['--router=tanstack', '--query', '--linter=eslint', '--vitest'],
+    flags: ['--router=tanstack', '--query', '--forms', '--zustand', '--linter=eslint', '--vitest'],
   },
-  { name: 'react-router', pm: 'npm', flags: ['--router=react-router', '--query'] },
-  { name: 'biome', pm: 'npm', flags: ['--router=none', '--linter=biome', '--shadcn', '--forms'] },
-  { name: 'shadcn', pm: 'npm', flags: ['--router=none', '--shadcn', '--forms'] },
   {
-    name: 'pnpm',
-    pm: 'pnpm',
-    flags: ['--pm=pnpm', '--router=tanstack', '--query', '--shadcn', '--vitest'],
+    name: 'react-router',
+    pm: 'npm',
+    flags: ['--router=react-router', '--query', '--forms', '--zustand', '--vitest'],
   },
+  {
+    name: 'biome',
+    pm: 'npm',
+    flags: ['--router=tanstack', '--linter=biome', '--shadcn', '--forms', '--query', '--vitest'],
+  },
+  { name: 'shadcn', pm: 'npm', flags: ['--router=none', '--shadcn', '--forms', '--vitest'] },
+  { name: 'full', pm: 'npm', flags: ['--preset=full'] },
+  { name: 'pnpm-full', pm: 'pnpm', flags: ['--pm=pnpm', '--preset=full'] },
 ];
+
+function scriptsFor(flags: string[]): string[] {
+  const scripts = ['build', 'lint', 'format:check'];
+  if (flags.includes('--vitest') || flags.includes('--preset=full')) scripts.push('test');
+  return scripts;
+}
 
 function runScript(pm: PackageManager, script: string, cwd: string) {
   const args = pm === 'npm' ? ['run', '--silent', script] : ['--silent', script];
@@ -54,30 +65,23 @@ describe('scaffold de verdade', () => {
   });
 
   it.each(COMBINATIONS)(
-    '$name: o projeto gerado passa no próprio build e lint',
+    '$name: o projeto gerado passa no próprio build, lint, formatação e testes',
     async ({ pm, flags }) => {
       const root = await scaffold(flags);
 
-      const build = await runScript(pm, 'build', root);
-      expect(build.exitCode, build.stderr).toBe(0);
+      for (const script of scriptsFor(flags)) {
+        const result = await runScript(pm, script, root);
+        expect(result.exitCode, `${script}:\n${result.stdout}\n${result.stderr}`).toBe(0);
 
-      const lint = await runScript(pm, 'lint', root);
-      expect(lint.exitCode, lint.stdout).toBe(0);
-      const complaints = [lint.stdout, lint.stderr]
-        .flatMap((output) => output.split(/\r?\n/))
-        .filter((line) => /\b(warning|error)\b/i.test(line));
-      expect(complaints, 'o linter não deve reclamar do código gerado').toEqual([]);
+        if (script === 'lint') {
+          const complaints = [result.stdout, result.stderr]
+            .flatMap((output) => output.split(/\r?\n/))
+            .filter((line) => /\b(warning|error)\b/i.test(line));
+          expect(complaints, 'o linter não deve reclamar do código gerado').toEqual([]);
+        }
+      }
     },
   );
-
-  it('o preset completo passa em build, lint e test', async () => {
-    const root = await scaffold(['--preset=full']);
-
-    for (const script of ['build', 'lint', 'test']) {
-      const result = await runScript('npm', script, root);
-      expect(result.exitCode, `${script}: ${result.stderr || result.stdout}`).toBe(0);
-    }
-  });
 
   it('remove a pasta quando o scaffold falha no meio', async () => {
     const workspace = await mkdtemp(join(tmpdir(), 'anvil-e2e-'));

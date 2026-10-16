@@ -119,6 +119,15 @@ function conventions(selection: Selection): string[] {
 
   if (selection.vitest) {
     items.push(
+      'Renderize com `renderWithProviders` de `src/test/render.tsx`: ele monta os providers do app' +
+        ' e devolve o `user` do user-event.' +
+        (selection.query && selection.api
+          ? ' As requisições são interceptadas pelo MSW: os handlers padrão ficam em' +
+            ' `src/test/server.ts`, e um teste troca a resposta com `server.use(...)`. Requisição' +
+            ' sem handler falha o teste.'
+          : ''),
+    );
+    items.push(
       'Os testes ficam ao lado do código (`*.test.ts`/`*.test.tsx`), sem pasta `__tests__`, e' +
         ' usam o `tsconfig.vitest.json`. Ele é referenciado pelo `tsconfig.json`, então o editor' +
         ' enxerga os matchers do jest-dom e o `typecheck` cobre os testes — sem que os tipos de' +

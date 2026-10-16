@@ -45,6 +45,7 @@ const COMBINATIONS: Record<string, { selection: Partial<Selection>; files: strin
       'src/routes/__root.tsx',
       'src/routes/examples.tsx',
       'src/lib/http.ts',
+      'src/test/render.tsx',
       '.github/workflows/ci.yml',
     ],
   },

@@ -68,6 +68,10 @@ $ pnpm create anvil@latest loja
 | **Estado e formulários** | Zustand, react-hook-form e zod                                      |
 | **Repositório**          | `git init` com commit inicial, husky e workflow de CI               |
 
+Com Query, formulários ou Zustand, o projeto já nasce com uma página de exemplos ligada ao
+roteador, que usa as peças juntas: uma lista vinda da API, o formulário validado e o estado global,
+cobertos por testes de verdade. Quando ela não servir mais, é só apagar um arquivo.
+
 Dois presets cobrem os extremos:
 
 ```bash
@@ -97,7 +101,7 @@ marque o que quer e copie a linha pronta, já na sintaxe do seu gerenciador.
 | `--tailwind` / `--no-tailwind`            | TailwindCSS v4.                                                                               |
 | `--shadcn` / `--no-shadcn`                | shadcn/ui, configurado sem rodar o `shadcn init`, com tema claro/escuro.                      |
 | `--prettier` / `--no-prettier`            | Prettier.                                                                                     |
-| `--vitest` / `--no-vitest`                | Vitest + Testing Library, com cobertura e typecheck dos testes.                               |
+| `--vitest` / `--no-vitest`                | Vitest + Testing Library, com testes do próprio app e MSW quando há API.                      |
 | `--zustand` / `--no-zustand`              | Zustand.                                                                                      |
 | `--forms` / `--no-forms`                  | react-hook-form + zod, com um formulário de exemplo — em shadcn/ui, se ele estiver ligado.    |
 | `--husky` / `--no-husky`                  | husky + lint-staged.                                                                          |

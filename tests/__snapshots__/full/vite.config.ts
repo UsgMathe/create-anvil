@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: false,
       restoreMocks: true,
+      env: { VITE_API_URL: 'http://localhost:3000' },
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.{test,spec}.{ts,tsx}'],
       coverage: {
