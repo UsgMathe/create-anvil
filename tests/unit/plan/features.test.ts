@@ -203,10 +203,9 @@ describe('formulário de exemplo com shadcn', () => {
     );
   });
 
-  it('shadcn sem forms não escreve componente que ninguém usa', () => {
-    expect(plannedPaths({ forms: false, shadcn: true }).some((path) => path.includes('/ui/'))).toBe(
-      false,
-    );
+  it('shadcn sem forms escreve só o button, que o toggle de tema usa', () => {
+    const ui = plannedPaths({ forms: false, shadcn: true }).filter((path) => path.includes('/ui/'));
+    expect(ui).toEqual(['src/components/ui/button.tsx']);
   });
 
   it('todo import @/ do formulário e dos componentes aponta para um arquivo do plano', () => {
@@ -368,13 +367,14 @@ describe('cliente HTTP e proxy', () => {
     expect(config).not.toContain('loadEnv');
   });
 
-  it('o módulo de exemplo usa o http quando ele existe, e fetch quando não', () => {
+  it('o módulo de exemplo usa o http quando ele existe, e dados em memória quando não', () => {
     expect(
       fileNamed('src/api/posts/posts.api.ts', { query: true, api: true, env: true }),
     ).toContain("from '@/lib/http'");
-    expect(fileNamed('src/api/posts/posts.api.ts', { query: true, api: false })).toContain(
-      'fetch(',
-    );
+
+    const inMemory = fileNamed('src/api/posts/posts.api.ts', { query: true, api: false });
+    expect(inMemory).not.toContain('fetch(');
+    expect(inMemory).toContain('const POSTS: Post[]');
   });
 
   it('o http normaliza erros num ApiError', () => {
@@ -416,7 +416,74 @@ describe('scripts e tsconfig de teste', () => {
   });
 });
 
+describe('página de exemplos', () => {
+  it('não existe quando nenhuma feature de exemplo foi escolhida', () => {
+    const paths = plannedPaths({ router: 'tanstack' });
+    expect(paths).not.toContain('src/routes/examples.tsx');
+    expect(fileNamed('src/routes/__root.tsx', { router: 'tanstack' })).not.toContain('/examples');
+  });
+
+  it('no TanStack, vira a rota /examples com loader que aquece o cache do Query', () => {
+    const selection = { router: 'tanstack', query: true } as const;
+    const page = fileNamed('src/routes/examples.tsx', selection);
+    expect(page).toContain("createFileRoute('/examples')");
+    expect(page).toContain('context.queryClient.ensureQueryData(postsListOptions())');
+    expect(fileNamed('src/routes/__root.tsx', selection)).toContain('to="/examples"');
+    expect(fileNamed('src/routes/index.tsx', selection)).toContain('to="/examples"');
+  });
+
+  it('no React Router, entra no array de rotas com o mesmo loader', () => {
+    const router = fileNamed('src/router.tsx', { router: 'react-router', query: true });
+    expect(router).toContain("path: 'examples'");
+    expect(router).toContain('queryClient.ensureQueryData(postsListOptions())');
+
+    const withoutQuery = fileNamed('src/router.tsx', { router: 'react-router', forms: true });
+    expect(withoutQuery).toContain("path: 'examples'");
+    expect(withoutQuery).not.toContain('loader');
+  });
+
+  it('sem roteador, aparece abaixo da página inicial', () => {
+    const selection = { router: 'none', zustand: true } as const;
+    expect(fileNamed('src/app.tsx', selection)).toContain('<ExamplesPage />');
+    expect(fileNamed('src/examples.tsx', selection)).toContain('export function ExamplesPage');
+  });
+
+  it('tem uma seção por feature escolhida, e só delas', () => {
+    const page = fileNamed('src/examples.tsx', { router: 'none', forms: true });
+    expect(page).toContain('<ContactSection />');
+    expect(page).not.toContain('PostsSection');
+    expect(page).not.toContain('CounterSection');
+  });
+
+  it('o README explica a página e como removê-la', () => {
+    const readme = fileNamed('README.md', { router: 'react-router', query: true });
+    expect(readme).toContain('## Exemplos');
+    expect(readme).toContain('a rota `examples` do `src/router.tsx`');
+    expect(fileNamed('README.md', {})).not.toContain('## Exemplos');
+  });
+});
+
 describe('base de produção', () => {
+  it('o TanStack ganha componentes padrão de erro e carregamento', () => {
+    const router = fileNamed('src/router.tsx', { router: 'tanstack' });
+    expect(router).toContain('defaultErrorComponent: RouteError');
+    expect(router).toContain('defaultPendingComponent: RoutePending');
+  });
+
+  it('sem roteador, um ErrorBoundary envolve o app', () => {
+    const main = fileNamed('src/main.tsx', { router: 'none' });
+    expect(main.indexOf('<ErrorBoundary>')).toBeLessThan(main.indexOf('<App />'));
+    expect(fileNamed('src/main.tsx', { router: 'tanstack' })).not.toContain('ErrorBoundary');
+  });
+
+  it('com shadcn, liga o tema escuro que os tokens já definem', () => {
+    const selection = { shadcn: true, router: 'tanstack' } as const;
+    expect(fileNamed('src/main.tsx', selection)).toContain('<ThemeProvider>');
+    expect(fileNamed('src/routes/__root.tsx', selection)).toContain('<ModeToggle />');
+    expect(plannedPaths(selection)).toContain('src/components/mode-toggle.tsx');
+    expect(plannedPaths({ shadcn: false })).not.toContain('src/components/theme-provider.tsx');
+  });
+
   it('renderiza o devtools do Query, que já é instalado', () => {
     expect(fileNamed('src/main.tsx', { query: true })).toContain('<ReactQueryDevtools');
   });

@@ -9,28 +9,43 @@ const contactSchema = z.object({
   email: z.email('Informe um e-mail válido'),
 });
 
-type ContactValues = z.infer<typeof contactSchema>;
+export type ContactValues = z.infer<typeof contactSchema>;
 
 interface ContactFormProps {
-  onSubmit: (values: ContactValues) => void;
+  onSubmit: (values: ContactValues) => Promise<void> | void;
 }
 
 export function ContactForm({ onSubmit }: ContactFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ContactValues>({ resolver: zodResolver(contactSchema) });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex max-w-sm flex-col gap-2">
       <label htmlFor="email" className="font-medium">
         E-mail
       </label>
-      <input id="email" type="text" {...register('email')} className="rounded border p-2" />
-      {errors.email ? <p role="alert">{errors.email.message}</p> : null}
-      <button type="submit" className="rounded bg-neutral-900 p-2 text-white">
-        Enviar
+      <input
+        id="email"
+        type="email"
+        autoComplete="email"
+        aria-invalid={errors.email ? true : undefined}
+        {...register('email')}
+        className="rounded border p-2"
+      />
+      {errors.email ? (
+        <p role="alert" className="text-sm text-red-600">
+          {errors.email.message}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="rounded bg-neutral-900 p-2 text-white disabled:opacity-50"
+      >
+        {isSubmitting ? 'Enviando…' : 'Enviar'}
       </button>
     </form>
   );
@@ -56,10 +71,10 @@ const contactSchema = z.object({
   email: z.email('Informe um e-mail válido'),
 });
 
-type ContactValues = z.infer<typeof contactSchema>;
+export type ContactValues = z.infer<typeof contactSchema>;
 
 interface ContactFormProps {
-  onSubmit: (values: ContactValues) => void;
+  onSubmit: (values: ContactValues) => Promise<void> | void;
 }
 
 export function ContactForm({ onSubmit }: ContactFormProps) {
@@ -115,7 +130,9 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
           >
             Limpar
           </Button>
-          <Button type="submit">Enviar</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Enviando…' : 'Enviar'}
+          </Button>
         </Field>
       </FieldGroup>
     </form>

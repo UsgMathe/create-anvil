@@ -1,4 +1,5 @@
 import { commandsFor } from '../env/package-manager.js';
+import { examplePagePath, hasExamples } from '../features/examples.js';
 import type { PackageManagerName, Selection } from '../plan/types.js';
 
 export interface ReadmeInput {
@@ -128,6 +129,29 @@ function conventions(selection: Selection): string[] {
   return items;
 }
 
+function examplesDescription(selection: Selection): string {
+  const where =
+    selection.router === 'none'
+      ? '`src/examples.tsx` aparece abaixo da página inicial'
+      : 'A página `/examples` (`src/routes/examples.tsx`)';
+  const pieces: string[] = [];
+  if (selection.query) pieces.push('uma lista do TanStack Query com estados de carregando e erro');
+  if (selection.forms) pieces.push('o formulário de contato com validação');
+  if (selection.zustand) pieces.push('um contador no Zustand');
+
+  const page = `\`${examplePagePath(selection)}\``;
+  const removal = {
+    none: `apague ${page} e o \`<ExamplesPage />\` do \`src/app.tsx\``,
+    'react-router': `apague ${page}, a rota \`examples\` do \`src/router.tsx\` e os links para \`/examples\``,
+    tanstack: `apague ${page} e os links para \`/examples\``,
+  }[selection.router];
+
+  return (
+    `${where} mostra ${pieces.join(', ')}, tudo ligado de verdade.` +
+    ` Quando não precisar mais, ${removal}.`
+  );
+}
+
 export function composeReadme(input: ReadmeInput): string {
   const { selection, scripts, packageManager } = input;
 
@@ -143,6 +167,10 @@ export function composeReadme(input: ReadmeInput): string {
   const conventionList = conventions(selection)
     .map((item) => `- ${item}`)
     .join('\n');
+
+  const examplesSection = hasExamples(selection)
+    ? `\n## Exemplos\n\n${examplesDescription(selection)}\n`
+    : '';
 
   const setup = selection.env
     ? `\`\`\`sh\ncp sample.env .env\n${runCommand(packageManager, 'dev')}\n\`\`\``
@@ -165,7 +193,7 @@ ${scriptRows}
 ## Convenções
 
 ${conventionList}
-
+${examplesSection}
 ---
 
 Gerado com [create-anvil](https://github.com/UsgMathe/create-anvil).

@@ -37,17 +37,19 @@ export async function listPosts(params: ListPostsParams): Promise<Post[]> {
   }
 
   return `${POSTS_TYPES}
+const PAGE_SIZE = 10;
+
+const POSTS: Post[] = [
+  { id: 1, title: 'Estes posts vêm de um array em memória' },
+  { id: 2, title: 'Troque listPosts pela chamada à sua API' },
+  { id: 3, title: 'As query keys ficam em posts.keys.ts' },
+];
+
 export async function listPosts(params: ListPostsParams): Promise<Post[]> {
-  const query = new URLSearchParams();
-  if (params.page !== undefined) query.set('page', String(params.page));
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
-  const response = await fetch(\`/posts?\${query.toString()}\`);
-
-  if (!response.ok) {
-    throw new Error(\`Falha ao buscar posts (\${response.status})\`);
-  }
-
-  return (await response.json()) as Post[];
+  const page = params.page ?? 1;
+  return POSTS.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
 `;
 }

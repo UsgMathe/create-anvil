@@ -74,8 +74,9 @@ carga-de-trabalho real, não estética:**
 
 - `vite.config.ts`: tailwind (10) → `tanstackRouter` (20) → `react` (30). O plugin do TanStack
   **precisa** vir antes do `@vitejs/plugin-react` com `autoCodeSplitting`, senão ele lança.
-- `main.tsx`: `QueryClientProvider` (10) por fora, `RouterProvider` por dentro. O `RouterProvider`
-  é terminal nas duas bibliotecas de rota, então só pode ser a folha.
+- `main.tsx`: `ErrorBoundary` (0, só sem roteador) → `ThemeProvider` (5) → `QueryClientProvider`
+  (10), com o `RouterProvider` como folha — ele é terminal nas duas bibliotecas de rota. Irmãos do
+  conteúdo (o `ReactQueryDevtools`) entram pelo campo `trailing` do provider, não como provider.
 
 `buildPlan` lança se duas features escreverem o mesmo arquivo, definirem o mesmo script com valores
 diferentes, ou definirem o elemento raiz do `main.tsx` — os conflitos aparecem no teste da matriz,
@@ -135,7 +136,7 @@ combinações em milissegundos.
   Para atualizar o tema, regenere `shadcn-theme.ts` a partir desse endpoint — não edite à mão.
 - **A feature `shadcn` é a dona de `src/components/ui/`.** Ela escreve os componentes que as
   features selecionadas pedem (`componentsFor` em `src/features/shadcn.ts`); hoje, o `forms` pede
-  `field`, `input`, `button`, `label` e `separator`. Uma feature que precise de componente o declara
+  `field`, `input`, `label` e `separator`, e o `button` sai sempre (o `ModeToggle` usa). Uma feature que precise de componente o declara
   ali em vez de escrever o arquivo: duas features escrevendo o mesmo `button.tsx` fazem o
   `buildPlan` lançar, e ali o componente sai uma vez só.
 - **`src/features/shadcn-ui.ts` é o registro copiado, não código nosso.** Cada componente vem de
@@ -158,11 +159,19 @@ combinações em milissegundos.
 - **A feature `api` exige a `env`**, porque `src/lib/http.ts` importa `@/config/env`. O `baseURL` é
   `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
   sessão preservado), em produção vai direto. Um interceptor transforma todo erro em `ApiError`.
+- **Os exemplos ficam numa página só**, montada por `src/compose/example-page.ts` com uma seção por
+  feature (`query`, `forms`, `zustand`) e escrita pela feature `examples`. `hasExamples()` em
+  `src/features/examples.ts` é a fonte única: os roteadores e o `app` a consultam para criar a rota,
+  os links e o `<ExamplesPage />`. Código de exemplo que nenhuma tela usa é o que o usuário apaga
+  no primeiro dia — toda demo nova entra como seção dessa página. Sem `api`, o `posts.api.ts` é
+  um fake em memória (nunca `fetch` relativo: o Vite devolve o `index.html` e o `.json()` lança).
 - **Comandos por gerenciador saem só de `commandsFor()`** (`src/env/package-manager.ts`): README,
   CI e husky usam `runScript`, `exec` e `installFrozen`. O bun é sempre `bun run <script>`:
   `bun test` e `bun build` são comandos nativos e ignorariam o script. O campo `packageManager`
   do `package.json` só é escrito quando a versão veio do user-agent; o `pnpm/action-setup` a lê
   dali, e sem ela o CI fixa o major.
+- **Classes de cor saem de `uiClasses()`** (`src/features/ui-classes.ts`): com shadcn são os tokens
+  (`text-muted-foreground`), que acompanham o tema escuro; sem ele, `neutral` fixo.
 - **Com vitest, os testes saem do `tsconfig.app.json`** e ganham um `tsconfig.vitest.json`
   próprio, e **o `tsconfig.json` da raiz precisa referenciá-lo, por último**. O editor só acha
   projeto para um arquivo pelas `references` da raiz; sem ela, o teste cai num projeto inferido,

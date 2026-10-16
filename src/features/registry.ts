@@ -3,6 +3,7 @@ import { api } from './api.js';
 import { app } from './app.js';
 import { base } from './base.js';
 import { env } from './env.js';
+import { examples } from './examples.js';
 import { forms } from './forms.js';
 import { githubActions } from './gh-actions.js';
 import { husky } from './husky.js';
@@ -34,6 +35,7 @@ export const FEATURES: readonly Feature[] = [
   testing,
   zustand,
   forms,
+  examples,
   env,
   husky,
   githubActions,

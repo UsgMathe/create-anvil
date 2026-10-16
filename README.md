@@ -95,7 +95,7 @@ marque o que quer e copie a linha pronta, já na sintaxe do seu gerenciador.
 | `--pm <pnpm\|npm\|yarn\|bun>`             | Força o gerenciador. Sem a flag, vale o que você usou para invocar o CLI.                     |
 | `--query` / `--no-query`                  | TanStack Query, com um módulo de exemplo em `src/api/posts/`.                                 |
 | `--tailwind` / `--no-tailwind`            | TailwindCSS v4.                                                                               |
-| `--shadcn` / `--no-shadcn`                | shadcn/ui, configurado sem rodar o `shadcn init`.                                             |
+| `--shadcn` / `--no-shadcn`                | shadcn/ui, configurado sem rodar o `shadcn init`, com tema claro/escuro.                      |
 | `--prettier` / `--no-prettier`            | Prettier.                                                                                     |
 | `--vitest` / `--no-vitest`                | Vitest + Testing Library, com cobertura e typecheck dos testes.                               |
 | `--zustand` / `--no-zustand`              | Zustand.                                                                                      |
