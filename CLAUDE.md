@@ -158,7 +158,9 @@ combinações em milissegundos.
   formas e da indentação.
 - **A feature `api` exige a `env`**, porque `src/lib/http.ts` importa `@/config/env`. O `baseURL` é
   `import.meta.env.DEV ? '/api' : env.VITE_API_URL`: em dev passa pelo proxy (sem CORS, cookie de
-  sessão preservado), em produção vai direto. Um interceptor transforma todo erro em `ApiError`.
+  sessão preservado), em produção vai direto. Um interceptor transforma todo erro em `ApiError`. O
+  `sample.env` aponta para o jsonplaceholder, para a página de exemplos mostrar dados reais no
+  primeiro `dev`; sem `api`, o schema traz `VITE_APP_NAME` no lugar da `VITE_API_URL`.
 - **Os exemplos ficam numa página só**, montada por `src/compose/example-page.ts` com uma seção por
   feature (`query`, `forms`, `zustand`) e escrita pela feature `examples`. `hasExamples()` em
   `src/features/examples.ts` é a fonte única: os roteadores e o `app` a consultam para criar a rota,

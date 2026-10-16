@@ -487,4 +487,9 @@ describe('base de produção', () => {
   it('renderiza o devtools do Query, que já é instalado', () => {
     expect(fileNamed('src/main.tsx', { query: true })).toContain('<ReactQueryDevtools');
   });
+
+  it('o env sem api não exige VITE_API_URL', () => {
+    expect(fileNamed('src/config/env.ts', { env: true })).not.toContain('VITE_API_URL');
+    expect(fileNamed('src/config/env.ts', { env: true, api: true })).toContain('VITE_API_URL');
+  });
 });
