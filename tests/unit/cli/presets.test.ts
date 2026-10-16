@@ -53,6 +53,54 @@ describe('presets', () => {
     );
   });
 
+  it('recusa pasta existente antes de qualquer outra pergunta', async () => {
+    const asked: string[] = [];
+    const recording: Prompter = {
+      text: () => Promise.reject(new Error('não deveria perguntar')),
+      confirm: (options) => {
+        asked.push(options.message);
+        return Promise.resolve(false);
+      },
+      select: (options) => {
+        asked.push(options.message);
+        return Promise.resolve(options.initial);
+      },
+    };
+
+    await expect(
+      resolveSelection({
+        args: parseCliArgs(['app']),
+        interactive: true,
+        prompter: recording,
+        isDirectoryTaken: (directoryName) => Promise.resolve(directoryName === 'app'),
+      }),
+    ).rejects.toMatchObject({ exitCode: 2 });
+    expect(asked).toEqual([]);
+  });
+
+  it('no modo interativo, pede outro nome quando a pasta já existe', async () => {
+    const answers = ['app', 'app-2'];
+    const messages: string[] = [];
+    const prompter: Prompter = {
+      text: (options) => {
+        messages.push(options.message);
+        return Promise.resolve(answers.shift() ?? '');
+      },
+      confirm: (options) => Promise.resolve(options.initial),
+      select: (options) => Promise.resolve(options.initial),
+    };
+
+    const selection = await resolveSelection({
+      args: parseCliArgs([]),
+      interactive: true,
+      prompter,
+      isDirectoryTaken: (directoryName) => Promise.resolve(directoryName === 'app'),
+    });
+
+    expect(selection.directoryName).toBe('app-2');
+    expect(messages[1]).toContain('já existe');
+  });
+
   it('recusa --api sem --env, porque o cliente lê o schema validado', async () => {
     await expect(resolve(['app', '--api', '--no-env'])).rejects.toMatchObject({ exitCode: 2 });
   });

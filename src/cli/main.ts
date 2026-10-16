@@ -36,7 +36,12 @@ async function runPipeline(argv: string[], env: NodeJS.ProcessEnv, io: Io): Prom
   intro(pc.cyan('create-anvil'));
 
   const interactive = isInteractive(args, env);
-  const resolved = await resolveSelection({ args, interactive, prompter: clackPrompter });
+  const resolved = await resolveSelection({
+    args,
+    interactive,
+    prompter: clackPrompter,
+    isDirectoryTaken: (directoryName) => io.exists(resolve(process.cwd(), directoryName)),
+  });
 
   const detected = detectPackageManager(env.npm_config_user_agent, args.pm);
   const selection = {

@@ -24,12 +24,14 @@ export interface ResolveInput {
   args: RawArgs;
   interactive: boolean;
   prompter: Prompter;
+  isDirectoryTaken?: (directoryName: string) => Promise<boolean>;
 }
 
-export type ResolvedSelection = Omit<Selection, 'packageManager'>;
+export type ResolvedSelection = Omit<Selection, 'packageManager' | 'packageManagerVersion'>;
 
 export async function resolveSelection(input: ResolveInput): Promise<ResolvedSelection> {
   const { args, interactive, prompter } = input;
+  const isDirectoryTaken = input.isDirectoryTaken ?? (() => Promise.resolve(false));
 
   if (args.preset !== undefined && !isPresetName(args.preset)) {
     throw new CliError(`Preset desconhecido: "${args.preset}". Use minimal ou full.`, {
@@ -45,13 +47,19 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
         exitCode: 2,
       });
     }
-    rawName = await prompter.text({
-      message: 'Nome do projeto',
-      validate: (value) => {
-        const result = validateProjectName(value);
-        return result.ok ? undefined : result.problems.join(' ');
-      },
-    });
+    let message = 'Nome do projeto';
+    for (;;) {
+      rawName = await prompter.text({
+        message,
+        validate: (value) => {
+          const result = validateProjectName(value);
+          return result.ok ? undefined : result.problems.join(' ');
+        },
+      });
+      const candidate = validateProjectName(rawName);
+      if (!candidate.ok || !(await isDirectoryTaken(candidate.directoryName))) break;
+      message = `A pasta "${candidate.directoryName}" já existe. Escolha outro nome`;
+    }
   }
 
   const name = validateProjectName(rawName);
@@ -59,6 +67,9 @@ export async function resolveSelection(input: ResolveInput): Promise<ResolvedSel
     throw new CliError(`Nome de projeto inválido:\n  - ${name.problems.join('\n  - ')}`, {
       exitCode: 2,
     });
+  }
+  if (await isDirectoryTaken(name.directoryName)) {
+    throw new CliError(`A pasta "${name.directoryName}" já existe.`, { exitCode: 2 });
   }
 
   const askBoolean = async (
