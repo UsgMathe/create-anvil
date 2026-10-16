@@ -6,7 +6,7 @@
   "author": "Matheus Gabriel Valenga",
   "type": "module",
   "bin": {
-    "create-anvil": "./dist/index.js"
+    "create-anvil": "dist/index.js"
   },
   "repository": {
     "type": "git",
