@@ -81,7 +81,12 @@ function conventions(selection: Selection): string[] {
   if (selection.api) {
     items.push(
       'Em desenvolvimento o `http` aponta para `/api`, que o Vite encaminha para `VITE_API_URL` —' +
-        ' isso evita CORS e preserva o cookie de sessão. Em produção ele vai direto na `VITE_API_URL`.',
+        ' isso evita CORS e preserva o cookie de sessão. Em produção ele vai direto na `VITE_API_URL`,' +
+        ' com `withCredentials`: o backend precisa liberar a origem no CORS (com' +
+        ' `Access-Control-Allow-Credentials`) e, se for outro domínio, emitir o cookie com' +
+        ' `SameSite=None; Secure`.',
+      'Todo erro do `http` chega como `ApiError` (`status`, `message`, `data`), com a mensagem' +
+        ' tirada do campo `message` da resposta quando existe. Trate por `error instanceof ApiError`.',
     );
   }
 

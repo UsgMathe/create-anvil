@@ -377,6 +377,12 @@ describe('cliente HTTP e proxy', () => {
     );
   });
 
+  it('o http normaliza erros num ApiError', () => {
+    const http = fileNamed('src/lib/http.ts', { api: true, env: true });
+    expect(http).toContain('export class ApiError extends Error');
+    expect(http).toContain('http.interceptors.response.use(');
+  });
+
   it('o módulo de exemplo segue a convenção de query-keys', () => {
     const keys = fileNamed('src/api/posts/posts.keys.ts', { query: true });
     expect(keys).toContain('all:');
