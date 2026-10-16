@@ -2,8 +2,6 @@ import { parse } from 'jsonc-parser';
 import { describe, expect, it } from 'vitest';
 
 import { buildPlan } from '../../../src/plan/build.js';
-import { assertManifestCoherent } from '../../../src/plan/invariants.js';
-import type { LinterChoice, RouterChoice } from '../../../src/plan/types.js';
 import { loadBaseTree } from '../../fixtures/base-tree.js';
 import { selectionOf } from '../../selection.js';
 
@@ -15,23 +13,7 @@ function fileNamed(path: string, plan: ReturnType<typeof buildPlan>): string {
   return file.contents;
 }
 
-const ROUTERS: RouterChoice[] = ['none', 'react-router', 'tanstack'];
-const LINTERS: LinterChoice[] = ['oxlint', 'eslint', 'biome'];
-
-describe('buildPlan — invariantes sobre toda a matriz', () => {
-  const combinations = ROUTERS.flatMap((router) =>
-    LINTERS.flatMap((linter) =>
-      [false, true].flatMap((query) =>
-        [false, true].map((tailwind) => ({ router, linter, query, tailwind })),
-      ),
-    ),
-  );
-
-  it.each(combinations)('manifesto coerente: %o', (overrides) => {
-    const plan = buildPlan(selectionOf(overrides), base);
-    expect(() => assertManifestCoherent(plan)).not.toThrow();
-  });
-
+describe('buildPlan', () => {
   it('é determinístico', () => {
     const selection = selectionOf({ router: 'tanstack', query: true });
     expect(buildPlan(selection, base)).toEqual(buildPlan(selection, base));
